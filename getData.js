@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import * as serviceWorker from './serviceWorker';
-//import {PostData} from './PostData.js'
 
 class Login extends Component {
 
@@ -14,7 +13,7 @@ class Login extends Component {
             username: 'ciustudents',
             password:'Pass123$',
             clientId:'backoffice',
-            clientSecret:'backoffice@lug',
+            clientSecret:'backoffice@lug'
         }
 
         this.login=this.login.bind(this);
@@ -22,28 +21,9 @@ class Login extends Component {
     }
 
     login(){
-       console.log("Login function");
-        fetch('https://emata-authservice-test.laboremus.no/users/login',{
-           headers: {
-                'Access-Control-Allow-Origin':'https://emata-authservice-test.laboremus.no/users/login',
-                'Transfer-Encoding': 'chunked',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Content-Encoding': 'gzip',
-                'Vary':'Accept-Encoding',
-                'X-Content-Type-Options':'nosniff',
-            },
-            method:'POST',
-            mode: 'no-cors',
-            body:{
-                    "username": "ciustudents",
-                    "password": "Pass123$",
-                    "clientId": "backoffice",
-                    "clientSecret": "backoffice@lug"
-            }
-        })
-        .then(response=>response.json())
-        .then(res=>{console.log(res);})
+        console.log("Login function");
+        this.posting(this.state);
+        console.log(JSON.stringify(this.state));
         /*
         PostData('login',this.state).then ((result) =>{
             let responseJSON = result;
@@ -52,20 +32,10 @@ class Login extends Component {
     }
 
     posting(userData){
-        fetch('https://emata-authservice-test.laboremus.no/users/login',{
-            //*
-            headers: {
-                'Authorization': '*',//'Authorization': 'bearer ${token}',
-                'Content-Type': 'application/json;charset=UTF-8',
-            },//*/
-            method: 'POST',
+        fetch('https://emata-crmservice-test.laboremus.no/api/contact',{
+            Authorization: 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImM0OTMwOGU0ZjQwMGEzMDU1ZGNkYmVhNTYyMGVmNTk2IiwidHlwIjoiSldUIn0.eyJuYmYiOjE1NDQ0MjgyODYsImV4cCI6MTU0NDUxNDY4NiwiaXNzIjoiaHR0cHM6Ly9lbWF0YS1hdXRoc2VydmljZS10ZXN0LmxhYm9yZW11cy5ubyIsImF1ZCI6WyJodHRwczovL2VtYXRhLWF1dGhzZXJ2aWNlLXRlc3QubGFib3JlbXVzLm5vL3Jlc291cmNlcyIsImNybSIsImxlZGdlciIsInBheW1lbnQiLCJzbXMiXSwiY2xpZW50X2lkIjoiYmFja29mZmljZSIsInN1YiI6IjFmMjY1NGFkLWUwOGQtNDdlMi1kYTlmLTA4ZDYzYjI4NzExOSIsImF1dGhfdGltZSI6MTU0NDQyODI4NiwiaWRwIjoibG9jYWwiLCJzY29wZSI6WyJvcGVuaWQiLCJwcm9maWxlIiwiY3JtIiwibGVkZ2VyIiwicGF5bWVudCIsInNtcyIsIm9mZmxpbmVfYWNjZXNzIl0sImFtciI6WyJwd2QiXX0.rbiB0JViVkZZQp-oHqw9zXGX47AYC4uVQZzfvxZN-2Rd20zAB5dvOloDqZe5A4Yi5qQunShyoHa-4_j_2TqX7xnzWGFdLdA8XUQJKCv67AJLtefGIsPe1Tkmu35C2ck2Gkfk451Qld9Z5wWYS8SjJABL2Al2T_2L2i_VAPN7X9fExsmVHiyg7la4W4HmEbqBRB_05sKaCg2o_IbVvAx_3ngPf51ZXP1cckHZklBCaaxYqnOiI486xIagcwulqhpPp-jB9gQ__SXiRTihRi3r-NbPSG3WktU7d8j6z641IrpGSds2o2B1XMYiRu_VhRxzIjDig0wS6LZIacdLml8OGA',
+            method: 'GET'
             //mode: 'no-cors',
-            body: {
-                    "username": "ciustudents",
-                    "password": "Pass123$",
-                    "clientId": "backoffice",
-                    "clientSecret": "backoffice@lug"
-            }
         })
         .then((response)=>console.log(response))
         .then((responseJson)=>{
@@ -80,7 +50,7 @@ class Login extends Component {
     onChange(e){
         this.setState({[e.target.name]: e.target.value});
         console.log(this.state);
-    }
+    }//onChange={this.onChange}
     render(){
         return(
             <div>
@@ -92,13 +62,16 @@ class Login extends Component {
                         <input type="password" name="password" value="Pass123$" placeholder="password" onChange={this.onChange}/>
                         <input type="submit" value="login" className="button" onClick={this.login}/>
                 </div>
-                <button className="btn-primary" onClick={this.login}>click</button>
             </div>
         );
     } 
 }
 
 ReactDOM.render(<Login />, document.getElementById('just'));
+
+// If you want your app to work offline and load faster, you can change
+// unregister() to register() below. Note this comes with some pitfalls.
+// Learn more about service workers: http://bit.ly/CRA-PWA
 serviceWorker.unregister();
 
 

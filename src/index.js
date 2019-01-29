@@ -27,15 +27,18 @@ class Login extends Component {
         fetch('https://emata-authservice-test.laboremus.no/users/login',{
            headers: {
                 'Access-Control-Allow-Origin':'https://emata-authservice-test.laboremus.no/users/login',
+                'Accept':'application/json',
+                'Content-Type':'application/json',//'application/x-www-form-urlencoded',//'application/json;charset=UTF-8',
+                'Content-Encoding':'gzip',
+                'Access-Control-Allow-Headers':'Origin, Authorization, X-Requested-With, Content-Type, Accept, Cache-Control',
+                'Access-Control-Allow-Credentials':'true',
+                'Access-Control-Allow-Methods':'POST',
                 'Transfer-Encoding': 'chunked',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Content-Encoding': 'gzip',
                 'Vary':'Accept-Encoding',
                 'X-Content-Type-Options':'nosniff',
             },
             method:'POST',
-            mode: 'no-cors',
+            //mode: 'no-cors',
             body:{
                     "username": "ciustudents",
                     "password": "Pass123$",
@@ -69,10 +72,10 @@ class Login extends Component {
                           <input type="password" className="inputBoxPassword" id="inputPassword" placeholder="password"/> 
                         </div>
                       </div> 
-                      <div className="form-group-ab7"> 
-                        <input type="submit" className="loginButton" value="sign in"/>
-                      </div>
-                    </form>  
+                    </form>
+                    <div className="form-group-ab7"> 
+                       <input type="submit" className="loginButton" onClick={this.login} value="sign in"/>
+                    </div>  
                 </div>
             </div>
         );

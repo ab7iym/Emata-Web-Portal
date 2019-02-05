@@ -40,7 +40,7 @@ div.parentDiv {
 }
 .inputBoxUsername {
   display: block;
-  width: 86%;
+  width: 95%;
   height: calc(2.28rem + 2px);
   margin-left: 38px;
   margin-top: -33px;
@@ -55,7 +55,7 @@ div.parentDiv {
 }
 .inputBoxPassword {
   display: block;
-  width: 86%;
+  width: 95%;
   height: calc(2.28rem + 2px);
   margin-left: 37px;
   margin-top: -35px;
@@ -107,34 +107,4 @@ img.loginLogo {
 .form-group-ab7 {
   padding: 0px;
   margin: 35px;
-}
-.errorMessageDiv {
-  background: rgba(255,0,0,0.2);
-  border-color: rgba(255,0,0,0.8);
-  border-radius: 0.5rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 50%;
-  height: calc(1.3rem + 2px);
-  line-height: 0px;
-  padding: 0px;
-  margin-top: 1rem;
-}
-.errorMessage {
-  background: rgba(255,0,0,0.4);
-  border-color: rgba(255,0,0,0);
-  border-radius: 0.5rem;
-  border-width: medium;
-  margin-left: auto;
-  margin-right: auto;
-  color: rgba(255,255,255,0.75);
-  text-align: middle;
-  font-size: 0.8rem;
-  font-weight: bold;
-  text-align: center;
-  width: 100%;
-  height: calc(1.3rem + 2px);
-  line-height: 0px;
-  padding-top: 9.5px;
 }

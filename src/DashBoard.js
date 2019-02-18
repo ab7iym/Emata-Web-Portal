@@ -5,9 +5,12 @@ import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Navbar from "./components/Navbar";
+import NavbarV2 from "./components/NavbarV2";
 import MonthlyOverview from './components/monthlyOverview';
 import DeliveryAmounts from './components/deliveryAmounts';
 import Payment from './components/Payment';
+import Farmers from './components/Farmers';
+import UtilizationRate from './components/utilizationRate';
 import './stylings/dashboard.css';
 
 const styles = theme => ({
@@ -36,7 +39,7 @@ function FullWidthGrid(props) {
   }
   else{
     return <div>
-      <div><Navbar /></div>
+      <NavbarV2/>
       <div className={classes.root}>
         <Grid container spacing={24}>
           <Grid item xs={12} sm={6}>
@@ -52,19 +55,21 @@ function FullWidthGrid(props) {
             </Paper>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Paper className="paymentCard">
+            <Paper className="farmersCard">
               <p className="cardNames">Farmers</p>
+              <Farmers/>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={3} lg={2}>
+            <Paper className="utilizationCard">
+              <p className="utilizationcardName">Utilization Rate</p>
+              <UtilizationRate/>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Paper className="paymentCard">
               <p className="cardNames">Payments</p>
               <Payment/>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={3} lg={2}>
-            <Paper className="bottomCard2">
-              <p className="cardNames">Utilization Rate</p>
             </Paper>
           </Grid>
         </Grid>

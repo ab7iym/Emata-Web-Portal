@@ -1,31 +1,14 @@
 .deliveryGraph {
   background-color: rgba(255,255,255,1.20);
   border-radius: 6px;
-  height: 47.3%;/*this is overwritten in the deliveryAmount.js code line 31*/
-  width: 43.6%;
-  z-index: 2;
-  position:absolute;  
-  display: block;
-}
-.deliveryGraphs {
-  background-color: rgba(255,255,255,1.20);
-  border-radius: 6px;
-  height:  47.3%;/*this is overwritten in the deliveryAmount.js code line 31*/
-  width: 43.6%;
-  z-index: 1;
-  position:absolute;  
-  display: block;
+  height: 308px;
+  width: 95%;  
+  margin: auto;
 }
 .buttonsRow {
   width: 100%;
   height: 85%;
   margin-left: 57px;
-}
-.blockOne {
-  background-color: rgba(255,0,255,0.0);
-  border-radius: 6px;
-  width: 95%;
-  margin: auto;
 }
 .deliveryButtons {
   background: rgba(255,255,255,0.7);
@@ -42,5 +25,4 @@
   padding: 0px;
   margin-left: 3px;
   margin-bottom: 3px
-
 }

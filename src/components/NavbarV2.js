@@ -1,4 +1,5 @@
-import React from "react";
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import {Redirect} from 'react-router-dom';
 import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
@@ -18,106 +19,9 @@ import MailIcon from "@material-ui/icons/Mail";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import MoreIcon from "@material-ui/icons/MoreVert";
 import Button from "@material-ui/core/Button";
-import NavLogo from './stylings/navBar.css';
+import './stylings/navBarV2.css';
 
-
-const styles = theme => ({
-  root: {
-    width: "100%"
-  },
-  grow: {
-    flexGrow: 1
-  },
-  Button:{
-  marginLeft: -40
-  },
-  menuButton: {
-    marginLeft: -12,
-    marginRight: 20,
-  },
-  title: {
-    display: "none",
-    [theme.breakpoints.up("sm")]: {
-      display: "block"
-    }
-  },
-  search: {
-    position: "relative",
-    borderRadius: theme.shape.borderRadius*5,
-    backgroundColor: fade(theme.palette.common.white, 0.30),
-    "&:hover": {
-      backgroundColor: fade(theme.palette.common.white, 0.45)
-    },
-    marginRight: theme.spacing.unit * 10,
-    marginLeft: 0,
-    width: "100%",
-    [theme.breakpoints.up("sm")]: {
-      marginLeft: theme.spacing.unit * 3,
-      width: "auto"
-    }
-  },
-  searchIcon: {
-    width: theme.spacing.unit * 9,
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  inputRoot: {
-    color: "inherit",
-    width: "100%"
-  },
-  inputInput: {
-    paddingTop: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit * 10,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: 200
-    }
-  },
-  sectionDesktop: {
-    display: "none",
-    [theme.breakpoints.up("md")]: {
-      display: "flex"
-    }
-  },
-  sectionMobile: {
-    display: "flex",
-    [theme.breakpoints.up("md")]: {
-      display: "none"
-    }
-  },
-  
-});
-
-class PrimarySearchAppBar extends React.Component {
-  state = {
-    anchorEl: null,
-    mobileMoreAnchorEl: null
-  };
-
-  handleProfileMenuOpen = event => {
-    this.setState({ anchorEl: event.currentTarget });
-  };
-
-  handleMenuClose = () => {
-    this.setState({ anchorEl: null });
-    this.handleMobileMenuClose();
-  };
-
-  handleMobileMenuOpen = event => {
-    this.setState({ mobileMoreAnchorEl: event.currentTarget });
-  };
-
-  handleMobileMenuClose = () => {
-    this.setState({ mobileMoreAnchorEl: null });
-    this.logout();//calls the logout function
-  };
+class NavBar extends Component {
 
   logout(){//this is the logout fuction
     localStorage.clear();//clearing the localstorage data
@@ -129,44 +33,40 @@ class PrimarySearchAppBar extends React.Component {
         window.location.reload()//this is used to refresh the page
       )
     }
-  };
-
-  render() {
-    const { anchorEl, mobileMoreAnchorEl } = this.state;
-    const { classes } = this.props;
-    const isMenuOpen = Boolean(anchorEl);
-    const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-
-    const renderMenu = (
-      <Menu
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isMenuOpen}
-        onClose={this.handleMenuClose}
-      >
-        <MenuItem onClick={this.handleMenuClose}>Sign Out</MenuItem>
-      </Menu>
-    );
-
-    const renderMobileMenu = (
-      <Menu
-        anchorEl={mobileMoreAnchorEl}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        open={isMobileMenuOpen}
-        onClose={this.handleMenuClose}
-      >
-        <MenuItem onClick={this.handleProfileMenuOpen}>
-          <IconButton color="inherit">
-            <AccountCircle />
-          </IconButton>
-          <p>Profile</p>
-        </MenuItem>
-      </Menu>
-    );
-
+  }
+  render(){
     return (
+      <div className="navBarStyle2">
+            <img className="navLogo2" src={require("./images/emata-logo.png")} alt={"logo"}/>
+            <div className="pageName2">Dashboard</div>
+            <div className="navBarSearch2">
+              <InputBase placeholder="Search…" classes={{root: "",input: ""}}/>
+            </div>
+            <div className="dateBackground2">
+              <input type="date" className="dateBox2" name=""/> 
+            </div>
+            <label className="to2"> to </label>
+            <div className="dateBackground2">
+              <input type="date" className="dateBox2" name="" onChange={this.updateInputPass}/> 
+            </div>
+            <img className="navBarUsernameIcon" src={require("./icons/userIcon3.png")} alt={"userIcon"}/>
+            <div className="usernameLabel2">{localStorage.getItem("FirstName")}</div>
+            <button className="navBarSignOutButton2" onClick={this.logout}>
+              <div>
+                <div className="usernameLabel2">Sign out</div>            
+                <img className="navBarLogoutIcon" src={require("./icons/logoutIcon2.png")} alt={"userIcon"}/>
+              </div>
+            </button>
+      </div>
+    );
+  }
+}
+
+export default NavBar;
+
+
+/*
+return (
       <div className="navToolBarStyle">
           <Toolbar  className="navBarStyle">
               <img className="navLogo" src={require("./images/emata-logo.png")} alt={"logo"}/>
@@ -222,11 +122,4 @@ class PrimarySearchAppBar extends React.Component {
         {renderMobileMenu}
       </div>
     );
-  }
-}
-
-PrimarySearchAppBar.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-
-export default withStyles(styles)(PrimarySearchAppBar);
+*/

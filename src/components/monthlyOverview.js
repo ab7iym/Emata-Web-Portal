@@ -6,25 +6,31 @@ import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, Col
 
 class MonthlyOverview extends Component {
  	render(){
-	 	const pieData = [
-	 		{name: 'Dwaniro',y: 13},
-	 		{name: 'Hannas',y: 23}, 
-	 		{name: 'Kasese',y: 19}
-	 	];
+ 		const categories= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  		const labels= {style: {fontSize:'40px'}}
+	 	const plotOptions = {
+    		series: {animation:{duration: 1500}}
+  		};
+  		var tooltip = {valueSuffix: 'ltrs'}
 	    return(
-	        <HighchartsChart  className="graph">
+	        <HighchartsChart  
+	        	className="graph"
+				plotOptions={plotOptions} 
+		        tooltip={tooltip} 
+		    >
 	          <Chart />
 
 	          <Title></Title>
 
 	          <Legend />
-
-	          <XAxis categories={['Jan', 'Feb', 'March', 'April', 'May','June','July','Aug','Sept','Oct','Nov','Dec']} />
-
+	          <XAxis categories={categories} lable = {labels}>
+	          	<XAxis.Title >Months</XAxis.Title>
+	          </XAxis>
 	          <YAxis>
+	          	<YAxis.Title >Quantity (ltrs)</YAxis.Title>
 	            <ColumnSeries name="2018" data={[9,2,1,3,4,7,9,6,1,11,17,15]} />
 	            <ColumnSeries name="2017" data={[7,3,5,7,6,9,5,3,4,8,10,9]} />
-	            <SplineSeries name="Average" data={[3, 2.67, 3, 6.33, 3.33,3, 2.67, 3, 6.33, 3.33, 10.33, 9.33]} />
+	            <SplineSeries name="Average" data={[8,2.5,3,5,5,8,7,4.5,2.5,9.5,13.5,12]} />
 	          </YAxis>
 	        </HighchartsChart>
 	    );

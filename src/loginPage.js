@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
+import 'react-dom';
 import {Redirect} from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/css/bootstrap.css';
-import {loginPage} from './stylings/loginPage.css';
+import './stylings/loginPage.css';
 import { Alert } from 'reactstrap';
 import * as serviceWorker from './serviceWorker';//import {PostData} from './PostData.js'
 

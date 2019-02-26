@@ -1,17 +1,15 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import 'react-dom';
 import './stylings/utilization.css';
 import Highcharts from 'highcharts';
-import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, ColumnSeries, SplineSeries, PieSeries} from 'react-jsx-highcharts';
+import {HighchartsChart, Chart, withHighcharts, Title, Legend, PieSeries} from 'react-jsx-highcharts';
 
 class UtilizationCard extends Component {
   render(){
     const pieData = [
-      {name: 'utilized',y: 36.1, color: "rgba(116,191,252,1.0)"},
+      {name: 'utilized',y: 36.1,  color: "#1AB394"},
       {name: 'not utilized',y: 63.9, color: "#e05757"}
     ];
-    const categories= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const labels= {style: {fontSize:'40px'}}
     const plotOptions = {
       series: {animation:{duration: 1500}}
     };

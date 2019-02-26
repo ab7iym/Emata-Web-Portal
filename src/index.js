@@ -1,6 +1,7 @@
-import React, { Component,Fragment } from 'react';
+import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
-import {Switch,Router,Route, BrowserRouter} from 'react-router-dom';
+import {Switch,Route, BrowserRouter} from 'react-router-dom';
+import {withStyles} from "@material-ui/core/styles";
 import DashBoard from "./DashBoard";
 import LoginPage from "./loginPage";
 import Default from "./components/Default";
@@ -21,5 +22,5 @@ class Login extends Component {
   }
 }
 
-ReactDOM.render(<Login />, document.getElementById('root'));
+ReactDOM.render(<Login />, document.getElementById('just'));
 serviceWorker.unregister();

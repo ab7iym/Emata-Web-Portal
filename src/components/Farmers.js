@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import 'react-dom';
 import './stylings/farmers.css';
 import Highcharts from 'highcharts';
-import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, ColumnSeries, SplineSeries, PieSeries} from 'react-jsx-highcharts';
+import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, SplineSeries} from 'react-jsx-highcharts';
 
 class FarmersCard extends Component {
   render(){
@@ -17,7 +17,7 @@ class FarmersCard extends Component {
         <div className="textRow">
           <div className="textCards">
             <label className="contentNumber1">101 </label>
-            <label className="content">registered farmers</label>
+            <label className="content">farmers</label>
           </div>
           <div className="textCards">
             <label className="contentNumber2">30 </label>
@@ -41,7 +41,7 @@ class FarmersCard extends Component {
           </XAxis>
           <YAxis>
             <YAxis.Title>No. of deliveries</YAxis.Title>
-            <SplineSeries name="Active Farmers" data= {[3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]} />
+            <SplineSeries name="Active Farmers" color="#1AB394" data= {[3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]} />
            </YAxis>
         </HighchartsChart>
         </div>

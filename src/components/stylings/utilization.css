@@ -29,7 +29,7 @@
 .contentUtilizationNumber2{
   margin-top: 20px;
   margin-left: 30px;
-  color: rgba(116,191,252,1.0);
+  color: #1AB394;/*rgba(116,191,252,1.0);*/
   text-anchor: center;
   font-size: 1.7rem;
   font-weight: bold;

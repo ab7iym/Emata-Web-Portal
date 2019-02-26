@@ -19,7 +19,6 @@
   font-family: arial;
   font-weight: bold;
   color: rgba(0,0,0,0.45);
-  text-indent: 7%;
   margin-right: 5%;
 }
 .navBarSignOutButton2 {
@@ -66,16 +65,14 @@
 }
 .dateBackground2{
   width: 10%;
-  height: calc(1.95rem + 2px);
+  height: calc(1.8rem + 2px);
   display: block;
-  margin-left: auto;
-  margin-right: auto;
   font-size: 0.8rem;
   color: white;
   background-color: rgba(255,255,255,1);
   background-clip: padding-box;
   border: 0px solid #ced4da;
-  border-radius: 8px;
+  border-radius: 6px;
   display: inline-block;
 }
 .to2{
@@ -88,12 +85,11 @@
 }
 .dateBox2 {
   display: block;
-  width: 95%;
-  height: calc(2.28rem + 2px);
+  width: 80%;
+  height: calc(1.58rem + 2px);
   margin-left: 15px;
-  margin-top: -3px;
+  margin-top: 2px;
   font-size: 0.8rem;
-  font-weight: bold;
   font-family: Arial;
   color: rgba(0,0,0,0.45);
   background-color: rgba(255,255,255,0.0);

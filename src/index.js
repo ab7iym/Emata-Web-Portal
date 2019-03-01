@@ -9,16 +9,29 @@ import * as serviceWorker from './serviceWorker';
 
 
 class Login extends Component {
-    render() {
-    return <div>
-        <BrowserRouter>
-        <Switch>
-          <Route exact path="/" component={LoginPage} />
-          <Route path="/dashboard" component={DashBoard} />
-          <Route component={Default} />
-        </Switch>
-        </BrowserRouter>
-      </div>;
+  constructor(props){
+    super(props);
+    this.state={details : ''}
+  }
+
+  handleCoopSignal=(details)=>{
+    //alert(id+" "+name);
+    let newState=this.state;
+    newState.details=details;
+    this.setState(newState);
+    console.log("Details Passed: ", this.state.details);
+  };
+
+  render() {
+  return <div>
+      <BrowserRouter>
+      <Switch>
+        <Route exact path="/" component={LoginPage } />
+        <Route path="/dashboard" component={DashBoard} />
+        <Route component={Default} />
+      </Switch>
+      </BrowserRouter>
+    </div>;
   }
 }
 

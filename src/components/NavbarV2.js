@@ -10,12 +10,11 @@ class NavBar extends Component {
   constructor(props){
     super(props)
     this.state = {
-      coopsId: [],//["paul","john"]
-      coops: [],
+      coopsId: [],
+      coops: [],//[{'name':'john','id':123},{'name':'paul','id':1234}],
       coopSelected: '',
       startDate: '',
       endDate: ''
-      //use this.state.coops.length to get the number of coops
     }
     this.logout=this.logout.bind(this);
     this.getCoopsList=this.getCoopsList.bind(this);
@@ -26,6 +25,7 @@ class NavBar extends Component {
     this.onSelectCoop=this.onSelectCoop.bind(this);
     this.handleStartDateChange=this.handleStartDateChange.bind(this);
     this.handleEndDateChange=this.handleEndDateChange.bind(this);
+    this.handleDefaultDateChange=this.handleDefaultDateChange.bind(this);
   }
 
   logout(){//this is the logout fuction
@@ -44,21 +44,9 @@ class NavBar extends Component {
     this.setState({startDate: newDate});
     console.log("startDate "+ this.state.startDate);
   }*/
-  handleStartDateChange(e){
-    console.log(e.target.value);
-    localStorage.setItem('startDt-sl',e.target.value);
-    this.setState({startDate: String(e.target.value)});
-    console.log("startDate Change: "+ this.state.startDate);
-    //this.setState({startDate: document.getElementById("myDate").value});
-    //console.log("startDate Change: "+ this.state.startDate);
+  componentDidUpdate(){
+    
   }
-  handleEndDateChange(e){
-    console.log(e.target.value);
-    localStorage.setItem('endDt-sl',e.target.value);
-    this.setState({startDate: String(e.target.value)});
-    console.log("EndDate Change: "+ this.state.endDate);
-  }
-
   getCoopsList(){//this function populates the coops list in the search bar
     console.log("getCoopsList function has been called");
     fetch('https://emata-crmservice-test.laboremus.no/api/organisation',{
@@ -88,23 +76,55 @@ class NavBar extends Component {
         return(error);//reject(error);
     });
   }
+  handleStartDateChange(e){
+    console.log(e.target.value);
+    localStorage.setItem('startDt-sl',e.target.value);
+    let newState = this.state;
+    newState.startDate = String(e.target.value);
+    this.setState(newState);
+    //this.props.passDateSignal(this.state.startDate, this.state.endDate);
+    console.log("startDate Change: "+ this.state.startDate);
+  }
+  handleEndDateChange(e){
+    console.log(e.target.value);
+    localStorage.setItem('endDt-sl',e.target.value);
+    let newState = this.state;
+    newState.endDate = String(e.target.value);
+    this.setState(newState);
+    this.props.passDateSignal(this.state.startDate, this.state.endDate);
+    console.log("EndDate Change: "+ this.state.endDate);
+  }
+  handleDefaultDateChange(startDate,endDate){
+    console.log("handleDefaultDateChange Called");
+    this.props.passDateSignal(startDate, endDate);//this passes the dates props to the parent component
+  }
   date_1_DefaultDate(){
-    var curr = new Date();
-    curr.setDate(curr.getDate()-3);
-    var date = curr.toISOString().substr(0,10);
-    //console.log("Start date: "+date);
-    return date
+    if(!localStorage.getItem('startDt-sl')){
+      var curr = new Date();
+      console.log("Default Curr date: "+curr);
+      curr.setDate(curr.getDate()-7);
+      var date = curr.toISOString().substr(0,10);
+      localStorage.setItem('startDt-sl',date);
+      console.log("Default 1 date: "+date);
+      return date
+    }
+    else{return localStorage.getItem('startDt-sl');}
   }
   date_2_DefaultDate(){
-    var curr = new Date();
-    curr.setDate(curr.getDate());
-    var date = curr.toISOString().substr(0,10);
-    console.log("End date: "+date);
-    return date
+    if(!localStorage.getItem('endDt-sl')){
+      var curr = new Date();
+      curr.setDate(curr.getDate());
+      var date = curr.toISOString().substr(0,10);
+      console.log("Default 2 date: "+date);
+      localStorage.setItem('endDt-sl',date);
+      return date
+    }
+    else{return localStorage.getItem('endDt-sl');}
   }
   date_2_minDate(){
-    console.log("startDate: "+this.state.startDate);
-    console.log("endDate: "+this.state.endDate);
+    return localStorage.getItem('startDt-sl');
+    //console.log("startDate: "+this.state.startDate);
+    //console.log("endDate: "+this.state.endDate);
   }
   maxDate(){
     var curr = new Date();
@@ -112,15 +132,19 @@ class NavBar extends Component {
     var date = curr.toISOString().substr(0,10);
     return date;
   }
-  onSelectCoop( obj ) {//this function gets the selected coop and saves it to local storage
-    console.log('onSelectCoop.call ', obj);
-    console.log('onSelectCoop.name ', obj[0].name);
-    console.log('onSelectCoop.id ', obj[0].id);
-    this.setState({coopSelected: obj[0].name});
-    localStorage.setItem('cp-sl-id',obj[0].id);//saving the selected coop id to the localStorage
-    localStorage.setItem('cp-sl-nm',obj[0].name);//saving the selected coop name to the localStorage
-    console.log( 'coopSelected '+this.state.coopSelected);
-    this.props.passCoopSignal(obj[0].id,obj[0].name);
+  onSelectCoop(obj) {//this function gets the selected coop and saves it to local storage
+    if(obj.length>0){//this checks if the obj array has a value
+      console.log('onSelectCoop.call ', obj);
+      console.log('onSelectCoop.name ', obj[0].name);
+      //console.log('onSelectCoop.id ', obj[0].id);
+      let newState = this.state;
+      newState.coopSelected = obj[0].name;
+      this.setState(newState);
+      localStorage.setItem('cp-sl-id',obj[0].id);//saving the selected coop id to the localStorage
+      localStorage.setItem('cp-sl-nm',obj[0].name);//saving the selected coop name to the localStorage
+      //console.log( 'coopSelected '+this.state.coopSelected);
+      this.props.passCoopSignal(obj[0].id,obj[0].name);
+    }
   }
 
   render(){
@@ -133,7 +157,7 @@ class NavBar extends Component {
               bsSize="small"
               className="navBarSearch2"
               labelKey="name"
-              onChange={this.onSelectCoop}
+              onChange={(e)=>this.onSelectCoop(e)}
               options={this.state.coops}
               placeholder="search coops..."
               emptyLabel="no match found"
@@ -159,10 +183,13 @@ class NavBar extends Component {
                   name="" 
                   onChange={(e) => this.handleEndDateChange(e)} 
                   defaultValue={this.maxDate()} 
-                  min="" 
+                  min={this.date_2_minDate()}
                   max={this.maxDate()}
               /> 
             </div>
+
+            {this.handleDefaultDateChange(this.date_1_DefaultDate(),this.date_2_DefaultDate())}
+            
             <img className="navBarUsernameIcon" src={require("./icons/userIcon3.png")} alt={"userIcon"}/>
             <div className="usernameLabel2">{localStorage.getItem("FirstName")}</div>
             <button className="navBarSignOutButton2" onClick={this.logout}>

@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import './stylings/loginPage.css';
 import { Alert } from 'reactstrap';
+import Loader from './components/loadingLogin';
 import * as serviceWorker from './serviceWorker';//import {PostData} from './PostData.js'
 
 class Login extends Component {
@@ -25,7 +26,8 @@ class Login extends Component {
             },
             portalPages:{
                 redirect: false
-            }
+            },
+            showLoader: false
         }
 
         this.login=this.login.bind(this);
@@ -33,12 +35,16 @@ class Login extends Component {
         this.updateInputPass=this.updateInputPass.bind(this);
         this.validation=this.validation.bind(this);
         this.verification=this.verification.bind(this);
+        this.showLoader = this.showLoader.bind(this);
         this.onShowAlert = this.onShowAlert.bind(this);
         this.onDismissAlert = this.onDismissAlert.bind(this);
     }
     login(){
        console.log(this.state);
        if(this.validation()===true){
+            let newState = this.state;
+            newState.showLoader=true;
+            this.setState(newState);
             fetch('https://emata-authservice-test.laboremus.no/users/login',{
                headers: {
                     'Access-Control-Allow-Origin':'http://localhost:3000/',
@@ -75,8 +81,14 @@ class Login extends Component {
             console.log("---------------------------------------");
             console.log("StatusMessage: "+serverResponse.message);
             this.onShowAlert("username or password is INCORRECT");
+            let newState = this.state;
+            newState.showLoader=false
+            this.setState(newState);
         }
         else{
+            //this.props.passDetails(this.state.loginDetails);//passing login details to index component/parent
+            localStorage.setItem('cred',this.state.loginDetails);//passing login details to LocalStorage
+            console.log("---------------------renewTokenDetails login: ", this.state.loginDetails);
             console.log("---------------------------------------");
             localStorage.setItem('Token',serverResponse.accessToken);//saving the token to local storage in the browser
             console.log("Access Token: "+serverResponse.accessToken);
@@ -143,6 +155,10 @@ class Login extends Component {
         this.setState({errorMessageState: abc});
         console.log("errorMessageState: "+this.state.errorMessageState);
     }
+    showLoader(){
+        console.log("showLoader Started");
+        if(this.state.showLoader){console.log("Tab1 is selected");return <Loader/>}
+    }
  
     render(){
         if(this.state.redirect){
@@ -170,6 +186,7 @@ class Login extends Component {
                     <Alert className="errorMessageDiv" isOpen={this.state.errorMessageState.visible} >
                         <p className="errorMessage">{this.state.errorMessageState.errorMsg}</p>
                     </Alert> 
+                    <div className="loading">{this.showLoader()}</div>
                 </div>
             </div>
         );

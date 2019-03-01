@@ -5,20 +5,21 @@ import Highcharts from 'highcharts';
 import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, ColumnSeries, SplineSeries} from 'react-jsx-highcharts';
 
 class Payment extends Component {
-	constructor() {
-	    super();
+	constructor(props) {
+	    super(props);
 	    this.state = {
 	      data: [0,0,0],
-	      Gduration: 1500
+	      Gduration: 1500,
+	      id: ""
 	    };
 	    this.paymentMethod=this.paymentMethod.bind(this);
-	    this.refresh=this.refresh.bind(this);
+	    this.checkIdChange=this.checkIdChange.bind(this);
   	}
   	componentDidMount() {
   	   //*
-  	   var org_id = localStorage.getItem('cp-sl-id');
-  	   console.log("org id: ", org_id);
-	   this.paymentMethod(org_id);
+  	   //var org_id = this.state.id;//localStorage.getItem('cp-sl-id');
+  	   //console.log("org id: ", org_id);
+	   //this.paymentMethod(org_id);
 	   //this.paymentMethod();//*/
 	   /*
 	   console.log("Component mounted");
@@ -28,15 +29,24 @@ class Payment extends Component {
 	   newState.data[2] = 120;
 	   this.setState(newState);//*/
 	}
-	refresh(){
+	checkIdChange(){
+		//console.log("checkIdChange function has been called");
+		if(this.state.id!==this.props.passCoopId){
+			let newState = this.state;
+			newState.id = this.props.passCoopId;
+			this.setState(newState);
+			this.paymentMethod(this.state.id);
+		}
+	}
+	/*refresh(){
 	   console.log("refreshed");
 	   let newState= this.state;
 	   newState.data[0] = 20;
 	   newState.data[1] = 150;
 	   newState.data[2] = 10;
 	   newState.Gduration = 1501;
-	   this.setState(newState);//*/
-	}
+	   this.setState(newState);
+	}//*/
 	shouldComponentUpdate(){
 		return true
 	}
@@ -80,9 +90,9 @@ class Payment extends Component {
 	        newState.data[0] = Bank;
 	        newState.data[1] = Cash;
 	        newState.data[2] = MobileMoney;
-	   		newState.Gduration = 1501;
-	        console.log("state: ", this.state);
+	   		newState.Gduration = newState.Gduration+0.0001;
 	        this.setState(newState);
+	        console.log("Payment state: ", this.state);
 	      })
 	      .catch(error => {
 	        return error; //reject(error);
@@ -91,7 +101,7 @@ class Payment extends Component {
   	}
  	render(){
  		//var org_data = localStorage.getItem('cp-sl');
- 		//{this.paymentMethod(org_data.id)}
+ 		this.checkIdChange()
  		const categories= ['Bank', 'Cash', 'MobileMoney'];
   		const labels= {style: {fontSize:'40px'}}
 	 	const plotOptions = {
@@ -99,14 +109,6 @@ class Payment extends Component {
     			animation:{duration: this.state.Gduration},
     		}
   		};
-  		let series = {
-        	series: [{
-		        type: 'column',
-		        colorByPoint: true,
-		        data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
-		        showInLegend: false
-		    }]
-        }
   		var tooltip = {valueSuffix: 'farmers'}
 	    return(
 	    	<div className="topDiv">
@@ -117,9 +119,7 @@ class Payment extends Component {
 					plotOptions={plotOptions} 
 			        tooltip={tooltip}
 			    >
-			    <Chart 
-			        series={series}
-			    />
+			    <Chart />
 		          <XAxis categories={categories} lable = {labels}>
 		          	<XAxis.Title >Channels</XAxis.Title>
 		          </XAxis>

@@ -16,6 +16,8 @@ class Payment extends Component {
 	    this.checkIdChange=this.checkIdChange.bind(this);
   	}
   	componentDidMount() {
+		this.paymentMethod(localStorage.getItem('cp-sl-id'))
+		//this.checkIdChange();
   	   //*
   	   //var org_id = this.state.id;//localStorage.getItem('cp-sl-id');
   	   //console.log("org id: ", org_id);
@@ -31,12 +33,12 @@ class Payment extends Component {
 	}
 	checkIdChange(){
 		//console.log("checkIdChange function has been called");
-		if(this.state.id!==this.props.passCoopId){
-			let newState = this.state;
-			newState.id = this.props.passCoopId;
-			this.setState(newState);
-			this.paymentMethod(this.state.id);
-		}
+		// if(this.state.id!==this.props.passCoopId){
+		// 	let newState = this.state;
+		// 	newState.id = this.props.passCoopId;
+		// 	this.setState(newState);
+		// 	this.paymentMethod(this.state.id);
+		// }
 	}
 	/*refresh(){
 	   console.log("refreshed");

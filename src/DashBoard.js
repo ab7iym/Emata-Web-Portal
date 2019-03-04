@@ -17,14 +17,18 @@ class FullWidthGrid extends React.Component{
       super(props);
       this.state={
         coopId: "",
-        coopName : localStorage.getItem('cp-sl-nm'),
-        startDate : '',
-        endDate : '',
+        coopName: localStorage.getItem('cp-sl-nm'),
+        startDate: '',
+        endDate: '',
+        entries: '',
+        dateRangeEntries: '',
         renewTokenDetails: '',
         showLoader: false
       }
       this.renewToken= this.renewToken.bind(this);
       this.verification=this.verification.bind(this);
+      this.getCoopsData=this.getCoopsData.bind(this);
+      this.getDataByDateRange=this.getDataByDateRange.bind(this);
     }
     handleCoopSignal=(id,name)=>{
       //alert(id+" "+name);
@@ -51,7 +55,7 @@ class FullWidthGrid extends React.Component{
       if(this.state.showLoader){return <Loader/>}
     }
 
-    componentDidMount(){
+    /*componentDidMount(){
       this.timer = setInterval(this.renewToken, 80000);
       //console.log("---------------------renewTokenDetails b4 save: ", localStorage.getItem('cred'));
       //let newState=this.state;
@@ -59,9 +63,9 @@ class FullWidthGrid extends React.Component{
       //this.setState(newState);
       //localStorage.removeItem('cred');
       console.log("---------------------renewTokenDetails: ", this.state.renewTokenDetails.username);
-    }
+    }*/
 
-    componentWillUnmount(){clearInterval(this.timer);}
+    //componentWillUnmount(){clearInterval(this.timer);}
 
     renewToken(){
       console.log("-------Renewing token------");
@@ -101,6 +105,53 @@ class FullWidthGrid extends React.Component{
           console.log("Access Token: "+serverResponse.accessToken);
       }
     }
+
+    getCoopsData(id,startDate,endDate){//this function populates the coops list in the search bar
+    console.log("getCoopsData function has been called");
+    fetch('https://emata-ledgerservice-test.laboremus.no/api/ledger/ledger-entries-in-period?organisationId='+id+'&entryType=1'+'&startDate='+startDate+'&endDate='+endDate,{
+        headers: {
+          'Authorization':'Bearer '+localStorage.getItem('Token'),
+          'Transfer-Encoding': 'chunked',
+          'Content-Type': 'application/json;charset=UTF-8',
+          'Content-Encoding': 'gzip',
+          'Vary':'Accept-Encoding',
+          'X-Content-Type-Options':'nosniff',
+        },
+        method: 'GET'
+    })
+    .then(response=>response.json())
+    .then(res=>{
+      console.log("--------------------------------------------------------------------------------------------------------------------------------");
+      console.log(res);
+      
+      let newState= this.state;
+      let sortedDateArray=[];
+      let dataRange='';
+      sortedDateArray = res.farmerLedgerEntries;//this stores the data of only the farmers' entries
+      sortedDateArray.sort(function(a,b){return a.entryDateTime - b.entryDateTime});
+      console.log("sorted-Object-Array: ",sortedDateArray);
+      dataRange=this.getDataByDateRange(sortedDateArray,startDate,endDate);//sorting by the date range and assigning it to dateRange
+      newState.Gduration = newState.Gduration+0.0001;
+      newState.entries = sortedDateArray;
+      newState.dateRangeEntries = dataRange;
+      this.setState(newState);
+      console.log("state: ", this.state);//*/
+    })
+    .catch((error)=>{
+        return(error);//reject(error);
+    });
+  };
+  getDataByDateRange(sortedDateArray,startDate,endDate){
+    let start=new Date(startDate);
+    let end=new Date(endDate);
+    let dataRange=[];
+    for(let i=0; i<sortedDateArray.length; i++){
+      if((new Date(sortedDateArray[i].entryDateTime))>=start && (new Date(sortedDateArray[i].entryDateTime))<=end){
+        dataRange[dataRange.length]=sortedDateArray[i];
+      }
+    }
+    return dataRange;
+  }
 
     render(){
       let classes = this.props;

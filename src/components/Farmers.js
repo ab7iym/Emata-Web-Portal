@@ -9,7 +9,13 @@ class FarmersCard extends Component {
     super(props);
     this.state = {
       entries: [],
-      contacts: []
+      contacts: [],
+      dateTimeLabelFormats: {
+        second: '%Y-%m-%d<br/>%H:%M:%S',
+        minute: '%Y-%m-%d<br/>%H:%M',
+        hour: '%Y-%m-%d<br/>%H:%M',
+        day: '%Y<br/>%m-%d',
+      }
     };
      this.getContactsData = this.getContactsData.bind(this);
      this.getLedgerData = this.getLedgerData.bind(this);
@@ -130,17 +136,12 @@ class FarmersCard extends Component {
           height={3215}
         >
           <Chart />
-          <Title />
-          <XAxis categories={categories} lable={labels}>
-            <XAxis.Title>Months</XAxis.Title>
+          <XAxis type = 'datetime' dateTimeLabelFormats={this.state.dateTimeLabelFormats}>
+            <XAxis.Title>Date</XAxis.Title>
+            <SplineSeries name="Active Farmers" data= {this.state.entries} color="#1AB394"/> 
           </XAxis>
           <YAxis>
-            <YAxis.Title>No. of deliveries</YAxis.Title>
-            <SplineSeries
-              name="Active Farmers"
-              color="#1AB394"
-              data={[3.9,4.2, 5.7,8.5,11.9,15.2,17.0,16.6,14.2,10.3,6.6,4.8]}
-            />
+            <YAxis.Title>No. of Deliveries</YAxis.Title>
           </YAxis>
         </HighchartsChart>
       </div>
@@ -150,3 +151,4 @@ class FarmersCard extends Component {
 
 export default withHighcharts(FarmersCard, Highcharts);
 
+//data={[3.9,4.2, 5.7,8.5,11.9,15.2,17.0,16.6,14.2,10.3,6.6,4.8]}

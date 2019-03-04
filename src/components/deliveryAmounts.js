@@ -66,8 +66,20 @@ class DeliveryCard extends Component {
               />
     }
     else if(this.state.tabs.tab2){
-      console.log("Tab2 is selected");return <AveDeliverySize/>}
-    else{console.log("Tab3 is selected");return <AmtMilkDeliveries/>}
+      console.log("Tab2 is selected");
+      return <AveDeliverySize
+                passStartDate={this.state.startDate} 
+                passEndDate={this.state.endDate} 
+                passCoopId={this.state.coopId}
+              />
+    }
+    else{console.log("Tab3 is selected");
+      return <AmtMilkDeliveries
+                passStartDate={this.state.startDate} 
+                passEndDate={this.state.endDate} 
+                passCoopId={this.state.coopId}
+      />
+    }
   }
   render(){
     return(

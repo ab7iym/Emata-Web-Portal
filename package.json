@@ -15,6 +15,7 @@
     "material-ui": "^0.20.2",
     "rc-datepicker": "^5.0.13",
     "react": "^16.8.2",
+    "react-autocomplete": "^1.8.1",
     "react-bootstrap": "^1.0.0-beta.5",
     "react-bootstrap-date-picker": "^5.1.0",
     "react-bootstrap-typeahead": "^3.3.4",
@@ -23,9 +24,11 @@
     "react-dom": "^16.8.2",
     "react-highcharts": "^16.0.2",
     "react-jsx-highcharts": "^3.4.0",
+    "react-redux": "^6.0.1",
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.1",
-    "reactstrap": "^7.1.0"
+    "reactstrap": "^7.1.0",
+    "redux": "^4.0.1"
   },
   "scripts": {
     "start": "react-scripts start",

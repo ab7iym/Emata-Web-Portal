@@ -5,20 +5,21 @@ import NoOfDeliveries from './deliveryAmounts-noOfDeliveries'
 import AveDeliverySize from './deliveryAmounts-aveDeliverySize'
 import AmtMilkDeliveries from './deliveryAmounts-amtMilkDeliveries'
 import Highcharts from 'highcharts';
-import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, ColumnSeries, SplineSeries} from 'react-jsx-highcharts';
+import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, SplineSeries} from 'react-jsx-highcharts';
 
 class DeliveryCard extends Component {
   constructor(props){
     super(props)
     this.state = {
-      coopId: '',
       tabs:{
         tab1: true,
         tab2: false,
-        tab3: false
+        tab3: false,
+        actTab1: 'activeDeliveryButtons',
+        actTab2: 'inactiveDeliveryButtons',
+        actTab3: 'inactiveDeliveryButtons'
       },
-      startDate: '',
-      endDate: ''
+      dateRangeEntries: ''
     }
     this.showGraph=this.showGraph.bind(this);
     this.updateTheState=this.updateTheState.bind(this);
@@ -28,66 +29,48 @@ class DeliveryCard extends Component {
   updateTheState(number){//this function is called to update the state name of loginDetails object
       var abc = this.state.tabs;
       abc.tab1 = false; abc.tab2 = false; abc.tab3 = false;
-      if(number===1){abc.tab1=true;}
-      else if(number===2){abc.tab2=true;}
-      else if(number===3){abc.tab3=true;}
+      abc.actTab1 = 'inactiveDeliveryButtons'; abc.actTab2 = 'inactiveDeliveryButtons'; abc.actTab3 = 'inactiveDeliveryButtons'
+      if(number===1){abc.tab1=true; abc.actTab1='activeDeliveryButtons'}
+      else if(number===2){abc.tab2=true; abc.actTab2='activeDeliveryButtons'}
+      else if(number===3){abc.tab3=true; abc.actTab3='activeDeliveryButtons'}
       this.setState({tabs: abc});
       console.log(this.state.tabs);
   }
   checkStateChange(){//this function is called to update the state name of loginDetails object
     console.log("checkIdChange function has been called");
-    console.log("DVApassed startdate:", this.props.passStartDate);
-    console.log("DVApassed coopId:", this.props.passCoopId);
-    if(this.state.coopId!==this.props.passCoopId || this.state.startDate!==this.props.passStartDate || this.state.startDate===this.props.passStartDate){
-      console.log("--------------DVA condition passed-----------");
-      if(this.state.startDate===this.props.passStartDate && this.state.coopId===this.props.passCoopId){
-        console.log("------------DVA condition same-Date----------");
-        return this.showGraph();
-      }
-      else{
-        console.log("--------------DVA condition different-Date-----------");
-        let newState = this.state;
-        newState.coopId = this.props.passCoopId;
-        newState.startDate = this.props.passStartDate;
-        newState.endDate = this.props.passEndDate;
-        this.setState(newState);
-        //return this.showGraph();
-      }
+    console.log("DVApassed startdate:", this.props.passCoopData);
+    if(this.state.dateRangeEntries===this.props.passCoopData){
+      return this.showGraph();
+    }
+    else{
+      console.log("--------------DVA condition different-Data-----------");
+      let newState = this.state;
+      newState.dateRangeEntries = this.props.passCoopData;
+      this.setState(newState);
     }
   }
   showGraph(){
     console.log("showGraph Started");
     if(this.state.tabs.tab1){
       console.log("Tab1 is selected");
-      return <NoOfDeliveries 
-                passStartDate={this.state.startDate} 
-                passEndDate={this.state.endDate} 
-                passCoopId={this.state.coopId}
-              />
+      return <NoOfDeliveries passCoopData={this.state.dateRangeEntries}/>
     }
     else if(this.state.tabs.tab2){
       console.log("Tab2 is selected");
-      return <AveDeliverySize
-                passStartDate={this.state.startDate} 
-                passEndDate={this.state.endDate} 
-                passCoopId={this.state.coopId}
-              />
+      return <AveDeliverySize passCoopData={this.state.dateRangeEntries}/>
     }
     else{console.log("Tab3 is selected");
-      return <AmtMilkDeliveries
-                passStartDate={this.state.startDate} 
-                passEndDate={this.state.endDate} 
-                passCoopId={this.state.coopId}
-      />
+      return <AmtMilkDeliveries passCoopData={this.state.dateRangeEntries}/>
     }
   }
   render(){
+    let className1=this.state.actTab1;
     return(
       <div>
         <div className="buttonsRow">
-            <button className="deliveryButtons" onClick={(e)=>{e.preventDefault();this.updateTheState(1)}}>No. of deliveries</button>
-            <button className="deliveryButtons" onClick={(e)=>{e.preventDefault();this.updateTheState(2)}}>Ave. delivery size</button>
-            <button className="deliveryButtons" onClick={(e)=>{e.preventDefault();this.updateTheState(3)}}>Amt. of milk deliveries</button>
+            <button className='activeDeliveryButtons' onClick={(e)=>{e.preventDefault();this.updateTheState(1)}}>No. of deliveries</button>
+            <button className='inactiveDeliveryButtons' onClick={(e)=>{e.preventDefault();this.updateTheState(2)}}>Ave. delivery size</button>
+            <button className='inactiveDeliveryButtons' onClick={(e)=>{e.preventDefault();this.updateTheState(3)}}>Amt. of milk deliveries</button>
         </div>
         {this.checkStateChange()}
       </div>

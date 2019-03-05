@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import 'react-dom';
 import {Redirect} from 'react-router-dom';
 import {Typeahead} from 'react-bootstrap-typeahead';
+import Autocomplete from  'react-autocomplete';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import './stylings/navBarV2.css';
@@ -44,8 +45,8 @@ class NavBar extends Component {
     this.setState({startDate: newDate});
     console.log("startDate "+ this.state.startDate);
   }*/
-  componentDidUpdate(){
-    
+  componentDidMount(){
+    this.getCoopsList();
   }
   getCoopsList(){//this function populates the coops list in the search bar
     console.log("getCoopsList function has been called");
@@ -63,13 +64,21 @@ class NavBar extends Component {
     .then(response=>response.json())
     .then(res=>{
       console.log(res);
+      let newState = this.state;
+      newState.coops = [];
       for (let i=0; i<res.length; i++) {
         if(res[i].isMainBranch){//checking if the coop is the main branch
           //this.state.coopsName.push(res[i].name);//this.state.coopsId.push(res[i].id);
-          this.state.coops.push({'name':res[i].name,'id':res[i].id});
+          newState.coops[i] = {'name':res[i].name,'id':res[i].id};
+          //this.state.coops.push({'name':res[i].name,'id':res[i].id});
           //console.log(res[i].name);
         }
       }
+      if(newState.coops.length>0){//setting the default value of the search input
+        console.log("---------------setting the defaultValue for search box-------------------");
+        this.props.passCoopSignal(newState.coops[0].id,newState.coops[0].name);
+      }
+      this.setState(newState);
       localStorage.setItem('cps',this.state.coops);
     })
     .catch((error)=>{
@@ -123,8 +132,6 @@ class NavBar extends Component {
   }
   date_2_minDate(){
     return localStorage.getItem('startDt-sl');
-    //console.log("startDate: "+this.state.startDate);
-    //console.log("endDate: "+this.state.endDate);
   }
   maxDate(){
     var curr = new Date();
@@ -148,21 +155,44 @@ class NavBar extends Component {
   }
 
   render(){
+    //let coopList = this.getCoopsList();
     return (
       <div className="navBarStyle2">
-            {this.getCoopsList()}
+            {/*this.getCoopsList()*/}
             <img className="navLogo2" src={require("./images/emata-logo.png")} alt={"logo"}/>
             <div className="pageName2">Dashboard</div>
             <Typeahead 
-              bsSize="small"
+              bsSize = 'sm'
               className="navBarSearch2"
               labelKey="name"
+              caseSensitive = {false}
               onChange={(e)=>this.onSelectCoop(e)}
               options={this.state.coops}
               placeholder="search coops..."
               emptyLabel="no match found"
               selectHintOnEnter={true}
             />
+            {/*<Autocomplete
+              value={ this.state.value }
+              inputProps={{ id: 'states-autocomplete' }}
+              wrapperStyle={{ position: 'relative', display: 'inline-block' }}
+              items={ this.state.coops }
+              getItemValue={ item => item.name }
+              onChange={(event, value) => this.setState({ value }) }
+              onSelect={ value => this.setState({ value }) }
+              renderMenu={ children => (
+                <div className = "menu">
+                  { children }
+                </div>
+              )}
+              renderItem={ (item, isHighlighted) => (
+                <div
+                  className={`item ${isHighlighted ? 'item-highlighted' : ''}`}
+                  key={ item.abbr } >
+                  { item.name }
+                </div>
+              )}
+            />*/}
             <div className="dateBackground2">
               <input 
                   id="myDate" 

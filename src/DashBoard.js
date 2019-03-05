@@ -17,33 +17,48 @@ class FullWidthGrid extends React.Component{
       super(props);
       this.state={
         coopId: "",
-        coopName: localStorage.getItem('cp-sl-nm'),
+        coopName: '',//localStorage.getItem('cp-sl-nm'),
         startDate: '',
         endDate: '',
         entries: '',
-        dateRangeEntries: '',
+        dateRangeEntries: [],
         renewTokenDetails: '',
+        paymentMethodData: [],
         showLoader: false
       }
       this.renewToken= this.renewToken.bind(this);
       this.verification=this.verification.bind(this);
       this.getCoopsData=this.getCoopsData.bind(this);
       this.getDataByDateRange=this.getDataByDateRange.bind(this);
+      this.paymentMethod=this.paymentMethod.bind(this);
     }
     handleCoopSignal=(id,name)=>{
-      //alert(id+" "+name);
       let newState=this.state;
       newState.coopId=id;
       newState.coopName= name;
       newState.showLoader=true;
       this.setState(newState);
+      //get the whole time range of the data needed from the 1st of the previous year to the current date
+      var end = new Date();
+      var start = new Date();
+      start.setDate(1);
+      start.setMonth(0);
+      start.setFullYear(end.getFullYear()-1);
+
+      //console.log("startDate: "+start+" endDate: "+end);
       console.log("ID Passed: ", this.state.coopId,"Name Passed: ", this.state.coopName);
+      console.log("Start-Date Passed: ", this.state.startDate);
+      console.log("End-Date Passed: ", this.state.endDate);
+      this.paymentMethod(this.state.coopId);
+      this.getCoopsData(this.state.coopId,start,end,this.state.startDate,this.state.endDate);
     };
     handleDateSignal=(startDate,endDate)=>{
       if(this.state.startDate!==startDate || this.state.endDate!==endDate){
         let newState=this.state;
         newState.startDate=startDate;
         newState.endDate=endDate;
+        let dataRange=this.getDataByDateRange(newState.entries,startDate,endDate);
+        newState.dateRangeEntries = dataRange;
         //newState.showLoader=true;
         this.setState(newState);
         console.log("Start-Date Passed: ", this.state.startDate);
@@ -106,7 +121,7 @@ class FullWidthGrid extends React.Component{
       }
     }
 
-    getCoopsData(id,startDate,endDate){//this function populates the coops list in the search bar
+    getCoopsData(id,startDate,endDate,startDateRange,endDateRange){//this function populates the coops list in the search bar
     console.log("getCoopsData function has been called");
     fetch('https://emata-ledgerservice-test.laboremus.no/api/ledger/ledger-entries-in-period?organisationId='+id+'&entryType=1'+'&startDate='+startDate+'&endDate='+endDate,{
         headers: {
@@ -128,12 +143,14 @@ class FullWidthGrid extends React.Component{
       let sortedDateArray=[];
       let dataRange='';
       sortedDateArray = res.farmerLedgerEntries;//this stores the data of only the farmers' entries
-      sortedDateArray.sort(function(a,b){return a.entryDateTime - b.entryDateTime});
+      sortedDateArray.sort(function(a,b){return new Date(a.entryDateTime) - new Date(b.entryDateTime)});
       console.log("sorted-Object-Array: ",sortedDateArray);
-      dataRange=this.getDataByDateRange(sortedDateArray,startDate,endDate);//sorting by the date range and assigning it to dateRange
+      dataRange=this.getDataByDateRange(sortedDateArray,startDateRange,endDateRange);//sorting by the date range and assigning it to dateRange
       newState.Gduration = newState.Gduration+0.0001;
+      newState.showLoader = false;//turning off the loader component
       newState.entries = sortedDateArray;
       newState.dateRangeEntries = dataRange;
+      localStorage.setItem('dateRangeEntries', newState.dateRangeEntries);
       this.setState(newState);
       console.log("state: ", this.state);//*/
     })
@@ -153,76 +170,90 @@ class FullWidthGrid extends React.Component{
     return dataRange;
   }
 
-    render(){
-      let classes = this.props;
-      if(!localStorage.getItem("Token")){
-        return (<Redirect exact to={'/'}/>)
-      }
-      else{
-        return <div>
-          <div className="dashboardNavDiv">
-            <NavbarV2 
-              passCoopSignal={(id,name)=>this.handleCoopSignal(id,name)} 
-              passDateSignal={(startDate,endDate)=>this.handleDateSignal(startDate,endDate)}
-            />
-            {this.showLoader()}
-          </div>
-          <div className="dashboardGraphContainer">
-            <div className={classes.root}>
-              <Grid container spacing={24}>
-                <Grid item xs={1} sm={12}>
-                  <Paper className="titleCard">
-                    <p className="title">{this.state.coopName}</p>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper className="monthlyOVCard">
-                    <p className="cardNames">Milk collections</p>
-                    <MonthlyOverview/>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper className="deliveryDetailsCard">
-                    <p className="cardNames">Deliveries</p>
-                    <DeliveryAmounts 
-                      passCoopId={this.state.coopId}
-                      passStartDate={this.state.startDate} 
-                      passEndDate={this.state.endDate}
-                    />
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper className="farmersCard">
-                    <p className="cardNames">Farmers</p>
-                    <Farmers 
-                      passCoopId={this.state.coopId}
-                      passStartDate={this.state.startDate} 
-                      passEndDate={this.state.endDate}
-                    />
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={3} lg={2}>
-                  <Paper className="utilizationCard">
-                    <p className="utilizationcardName">Utilization Rate</p>
-                    <UtilizationRate 
-                      passCoopId={this.state.coopId}
-                      passStartDate={this.state.startDate} 
-                      passEndDate={this.state.endDate}
-                    />
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper className="paymentCard">
-                    <p className="cardNames">Payments</p>
-                    <Payment passCoopId={this.state.coopId}/>
-                  </Paper>
-                </Grid>
+  paymentMethod(id){//this function populates the payment method list in the payment graph
+    console.log("---------------------paymentMethod function has been called------------------------");
+    fetch(" https://emata-crmservice-test.laboremus.no/api/payment/method?organisationId="+id,
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("Token"),
+        "Transfer-Encoding": "chunked",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Content-Encoding": "gzip",
+        Vary: "Accept-Encoding",
+        "X-Content-Type-Options": "nosniff"
+      },
+      method: "GET"
+    })
+    .then(response => response.json())
+    .then(res=>{
+      console.log("paymentMethod Res dashboard",res);
+      let newState= this.state;
+      newState.paymentMethodData = res;
+      this.setState(newState);
+    })
+    .catch(error => {return error;}); //reject(error);
+  }
+
+  render(){
+    let classes = this.props;
+    if(!localStorage.getItem("Token")){
+      return (<Redirect exact to={'/'}/>)
+    }
+    else{
+      return <div>
+        <div className="dashboardNavDiv">
+          <NavbarV2 
+            passCoopSignal={(id,name)=>this.handleCoopSignal(id,name)} 
+            passDateSignal={(startDate,endDate)=>this.handleDateSignal(startDate,endDate)}
+          />
+          {this.showLoader()}
+        </div>
+        <div className="dashboardGraphContainer">
+          <div className={classes.root}>
+            <Grid container spacing={24}>
+              <Grid item xs={1} sm={12}>
+                <Paper className="titleCard">
+                  <p className="title">{this.state.coopName}</p>
+                </Paper>
               </Grid>
-            </div>
+              <Grid item xs={12} sm={6}>
+                <Paper className="monthlyOVCard">
+                  <p className="cardNames">Annual Milk Collections</p>
+                  <MonthlyOverview passCoopData={this.state.entries}/>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Paper className="deliveryDetailsCard">
+                  <p className="cardNames">Deliveries</p>
+                  <DeliveryAmounts passCoopData={this.state.dateRangeEntries}/>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Paper className="farmersCard">
+                  <p className="cardNames">Farmers Demographics</p>
+                  <Farmers 
+                    passCoopData={this.state.dateRangeEntries}
+                  />
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={3} lg={2}>
+                <Paper className="utilizationCard">
+                  <p className="utilizationcardName">Utilization Rate</p>
+                  <UtilizationRate passCoopData={this.state.dateRangeEntries}/>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Paper className="paymentCard">
+                  <p className="cardNames">Payments</p>
+                  <Payment passCoopData={this.state.paymentMethodData}/>
+                </Paper>
+              </Grid>
+            </Grid>
           </div>
         </div>
-      }
+      </div>
     }
+  }
 }
 
 FullWidthGrid.propTypes = {
@@ -230,64 +261,3 @@ FullWidthGrid.propTypes = {
 };
 
 export default FullWidthGrid;
-
-
-
-/*
-//Linear buffer code to indicate loading
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import LinearProgress from '@material-ui/core/LinearProgress';
-
-const styles = {
-  root: {
-    flexGrow: 1,
-  },
-};
-
-class LinearBuffer extends React.Component {
-  state = {
-    completed: 0,
-    buffer: 10,
-  };
-
-  componentDidMount() {
-    this.timer = setInterval(this.progress, 500);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timer);
-  }
-
-  progress = () => {
-    const { completed } = this.state;
-    if (completed > 100) {
-      this.setState({ completed: 0, buffer: 10 });
-    } else {
-      const diff = Math.random() * 10;
-      const diff2 = Math.random() * 10;
-      this.setState({ completed: completed + diff, buffer: completed + diff + diff2 });
-    }
-  };
-
-  render() {
-    const { classes } = this.props;
-    const { completed, buffer } = this.state;
-    return (
-      <div className={classes.root}>
-        <LinearProgress variant="buffer" value={completed} valueBuffer={buffer} />
-        <br />
-        <LinearProgress color="secondary" variant="buffer" value={completed} valueBuffer={buffer} />
-      </div>
-    );
-  }
-}
-
-LinearBuffer.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(LinearBuffer);
-
-*/

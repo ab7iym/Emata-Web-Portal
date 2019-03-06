@@ -10,6 +10,7 @@ class FarmersCard extends Component {
     this.state = {
       entries: [],
       contacts: [],
+      object:[],
       obj:[],
       daysWeek:[],
       dateTimeLabelFormats: {
@@ -26,24 +27,41 @@ class FarmersCard extends Component {
   }
  
   
-  // componentWillMount(){
-  //   this.setFarmersGraphData(localStorage.getItem('cp-sl-id'));
-   
-  // }
-  // componentDidMount() {
-  //   this.test();
-  //   this.subtract();
-  // }
+// calcaulating the number of days within the range
+mydiff = (date1,date2,interval) =>{
+  var second=1000, minute=second*60, hour=minute*60, day=hour*24, week=day*7;
+  date1 = new Date(date1);
+  date2 = new Date(date2);
+  var timediff = date2 - date1;
+  if (isNaN(timediff)) return NaN;
+  switch (interval) {
+      case "years": return date2.getFullYear() - date1.getFullYear();
+      case "months": return (
+          ( date2.getFullYear() * 12 + date2.getMonth() )
+          -
+          ( date1.getFullYear() * 12 + date1.getMonth() )
+      );
+      case "weeks"  : return Math.floor(timediff / week);
+      case "days"   : return Math.floor(timediff / day); 
+      case "hours"  : return Math.floor(timediff / hour); 
+      case "minutes": return Math.floor(timediff / minute);
+      case "seconds": return Math.floor(timediff / second);
+      default: return undefined;
+  }
+}
 
-  
+
 
 	static getDerivedStateFromProps(newProp=this.props, state=this.state){
 		console.log("------------Milk Collection received props-------------");
 		let newState = state;
-		newState.entries = newProp.passCoopData;
+		newState.object = newProp;
     return newState;
-    // this.handleFarmersGraph(this.props);
 	}
+
+  componentDidUpdate(){
+    this.handleFarmersGraph(this.props);
+  }
 
 //   getContactsData(id){
 //     console.log("famers function has been called");
@@ -94,99 +112,119 @@ class FarmersCard extends Component {
 //     });
 //   }
 
-//   test = ()=>{
-//     if(this.state.entries.length !== 0 && this.state.contacts.length !== 0){
-//     console.log(this.state.contacts.length);
-//     console.log(this.state.entries);
-//     alert()
-//     this.handleFarmersGraph();
-//   };
-
- 
-//   };  
-
 //   setFarmersGraphData(id){
 //     this.getContactsData(id);
 //     this.getLedgerData(id);
 //   }
   
   handleFarmersGraph = (object)=>{
-    console.log(object);
+    console.log("OBJECT RECIEVED",object);
 
-    if(object.passCoopDates){
-      let startDate = object.passCoopDates.start;
-      let endDate = object.passCoopDates.end;
-    }
-    if(object.passCoopDates){
-    // let i = 0;
-    // let j = 0;
-    // let days = [];
-    // let found = 0;
-    // let obj = object.farmerLedgerEntries;
-    // let dt= "";   
+    let startDate = "";
+    let endDate = "";
+
     
-    // console.warn(obj[0].entryDateTime);
-
-
-    // for(i=0;i<obj.length;i++){
-    //   let yr = new Date(obj[i].entryDateTime).getFullYear();
-    //   let mt = new Date(obj[i].entryDateTime).getMonth();
-    //   let dy = new Date(obj[i].entryDateTime).getDate();
-    //   dt = yr+"-"+mt+"-"+dy;
-
-
-    //   for(j=0;j<=obj.length;j++){
-    //     if(days[j] === dt){
-    //       found = 1;
-    //       break;        
-    //     }  
-    //   }
-    //   if(found === 0){
-    //     days.push(dt);
-    //   }else{found = 0;
-    //   }
-
-    //   }
-  
-
-    //  console.log(days); 
-  }
-
-  };
-
-//calcaulating the number of days within the range
-mydiff = (date1,date2,interval) =>{
-  var second=1000, minute=second*60, hour=minute*60, day=hour*24, week=day*7;
-  date1 = new Date(date1);
-  date2 = new Date(date2);
-  var timediff = date2 - date1;
-  if (isNaN(timediff)) return NaN;
-  switch (interval) {
-      case "years": return date2.getFullYear() - date1.getFullYear();
-      case "months": return (
-          ( date2.getFullYear() * 12 + date2.getMonth() )
-          -
-          ( date1.getFullYear() * 12 + date1.getMonth() )
-      );
-      case "weeks"  : return Math.floor(timediff / week);
-      case "days"   : return Math.floor(timediff / day); 
-      case "hours"  : return Math.floor(timediff / hour); 
-      case "minutes": return Math.floor(timediff / minute);
-      case "seconds": return Math.floor(timediff / second);
-      default: return undefined;
-  }
-}
-subtract(){
-    let startDate = new Date(2018,5,21);
-    let endDate = new Date(2018,12,31);
+    if(object.passCoopDates){
     let formateDate; 
     let dateRange;
     let weeks;
+    startDate = object.passCoopDates.start;
+    endDate = object.passCoopDates.end;
 
     dateRange = this.mydiff(startDate,endDate,"days");
     weeks = this.mydiff(startDate,endDate,"weeks");
-    console.log(weeks);
-};
+    console.log(weeks," weeks");
+    }
+
+    if(object.passCoopDates && object.passCoopData){
+    let i = 0;
+    let j = 0;
+    let days = [];
+    let found = 0;
+    let obj = object.passCoopData;
+    let dt= "";
+    let flag = 0;
+    let contacts = [];
+    let activeFarmers = 0;
+
+    for(i=0;i<obj.length;i++){
+      let id = obj[i].farmerId;
+      // contacts.push(id);
+      for(j=0;j<=obj.length;j++){
+        if(contacts[j] === id){
+          flag = 1;
+          break;        
+        }  
+      }
+      if(flag === 0){
+        contacts.push(id);
+      }
+      else{
+        flag = 0;
+      }
+
+      }
+
+      if(contacts.length !== 0){
+        function addDays(date, days) {
+          var result = new Date(date);
+          result.setDate(result.getDate() + days);
+          return result;
+        }
+        for(i=0;i<contacts.length;i++){
+          let contact = contacts[i];
+
+          let tempStartDate = startDate;
+          let tempEndDate = addDays(tempStartDate,7);
+
+          for(j=0;j<=obj.length;j++,tempStartDate = addDays(tempEndDate,1)){
+            tempEndDate = addDays(tempStartDate,7);          
+            console.log(tempStartDate, "----", tempEndDate);
+            
+          }}     
+      }
+      console.log(contacts); 
+
+    }
+
+      // console.warn(obj[0].entryDateTime);
+
+      // for(i=0;i<obj.length;i++){
+      //   let yr = new Date(obj[i].entryDateTime).getFullYear();
+      //   let mt = new Date(obj[i].entryDateTime).getMonth();
+      //   let dy = new Date(obj[i].entryDateTime).getDate();
+      //   dt = yr+"-"+mt+"-"+dy;
+
+
+      //   for(j=0;j<=obj.length;j++){
+      //     if(days[j] === dt){
+      //       found = 1;
+      //       break;        
+      //     }  
+      //   }
+      //   if(found === 0){
+      //     days.push(dt);
+      //   }else{found = 0;
+      //   }
+
+      //   }
+    
+      //  console.log(days); 
+    
+
+  };
+
+// subtract(){
+//     let startDate = new Date(2018,5,21);
+//     let endDate = new Date(2018,12,31);
+//     let formateDate; 
+//     let dateRange;
+//     let weeks;
+
+//     dateRange = this.mydiff(startDate,endDate,"days");
+//     weeks = this.mydiff(startDate,endDate,"weeks");
+//     console.log(weeks);
+// };
 
   render(){
     const categories = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];

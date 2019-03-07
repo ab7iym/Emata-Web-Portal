@@ -41,7 +41,7 @@ mydiff = (date1,date2,interval) =>{
           -
           ( date1.getFullYear() * 12 + date1.getMonth() )
       );
-      case "weeks"  : return Math.floor(timediff / week);
+      case "weeks"  : return Math.ceil(timediff / week);
       case "days"   : return Math.floor(timediff / day); 
       case "hours"  : return Math.floor(timediff / hour); 
       case "minutes": return Math.floor(timediff / minute);
@@ -59,37 +59,42 @@ mydiff = (date1,date2,interval) =>{
     return newState;
 	}
 
-  componentDidUpdate(){
-    this.handleFarmersGraph(this.props);
+  // componentDidUpdate(){
+  //   this.handleFarmersGraph(this.props);
+  // }
+
+componentDidUpdate(){
+  this.setgraphData(this.props);
+  this.handleFarmersGraph(this.props);
   }
 
-//   getContactsData(id){
-//     console.log("famers function has been called");
-//    try{
-//     fetch(
-//       `https://emata-crmservice-test.laboremus.no/api/contact/role?OrganisationId=${id}&types=1`,
-//       {
-//         headers: {
-//           Authorization: "Bearer " + localStorage.getItem("Token"),
-//           "Transfer-Encoding": "chunked",
-//           "Content-Type": "application/json;charset=UTF-8",
-//           "Content-Encoding": "gzip",
-//           Vary: "Accept-Encoding",
-//           "X-Content-Type-Options": "nosniff",
-//           "types": 1
-//         },
-//         method: "GET"
-//       })
-//     .then(response=>response.json())
-//     .then(res=>{
-//       let st = this.state;
-//       st.contacts = res;
-//       this.setState(st);
-//       console.log(this.state.contacts);
-//       return res;
-//     })
-//    }catch(e){console.log(e);}
-//   }
+  getContactsData(id){
+    console.log("famers function has been called");
+   try{
+    fetch(
+      `https://emata-crmservice-test.laboremus.no/api/contact/role?OrganisationId=${id}&types=1`,
+      {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("Token"),
+          "Transfer-Encoding": "chunked",
+          "Content-Type": "application/json;charset=UTF-8",
+          "Content-Encoding": "gzip",
+          Vary: "Accept-Encoding",
+          "X-Content-Type-Options": "nosniff",
+          "types": 1
+        },
+        method: "GET"
+      })
+    .then(response=>response.json())
+    .then(res=>{
+      let st = this.state;
+      st.contacts = res;
+      this.setState(st);
+      console.log(this.state.contacts);
+      return res;
+    })
+   }catch(e){console.log(e);}
+  }
 
 //   getLedgerData(id){
 //     console.log("Ledger function has been called");
@@ -116,18 +121,59 @@ mydiff = (date1,date2,interval) =>{
 //     this.getContactsData(id);
 //     this.getLedgerData(id);
 //   }
+setgraphData = (object) =>{
+  console.log("OBJECT RECIEVED",object);
+  let obj = object.passCoopData;
+  let graphData = [];
+  let getstartDate = object.passCoopDates.start;
+  let getendDate =  object.passCoopDates.end;
+  let temporaryDate;
+  let counter;
+
+  function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }  
+for(temporaryDate = new Date(getstartDate); temporaryDate <=getendDate; temporaryDate = addDays(temporaryDate,1)){
+  counter = 0;
+  let year1 = temporaryDate.getFullYear();
+  let month1 = temporaryDate.getMonth();
+  let day1 = temporaryDate.getDay();
+
+  for(let i = 0; i < obj.length; i++){
+    let deliveries = obj[i].entryDateTime;
+    let year2 = deliveries.getFullYear();
+    let month2 = deliveries.getMonth();
+    let day2 = deliveries.getDay();
+
+    if(year1 === year2 && month1 === month2 && day1 === day2){
+      counter++;
+    }
+  }
+  graphData.push({'date': temporaryDate,'data' : counter});
+  
+}
+console.log(graphData);
+};
+
   
   handleFarmersGraph = (object)=>{
-    console.log("OBJECT RECIEVED",object);
+    this.getContactsData();
+   
 
     let startDate = "";
     let endDate = "";
+    let weeks;
 
-    
-    if(object.passCoopDates){
+    let graphData = [];
+    let temperyDate = new Date();
+  
+//changing the start and end date into days, weeeks//
+if(object.passCoopDates){
     let formateDate; 
     let dateRange;
-    let weeks;
+    
     startDate = object.passCoopDates.start;
     endDate = object.passCoopDates.end;
 
@@ -136,95 +182,100 @@ mydiff = (date1,date2,interval) =>{
     console.log(weeks," weeks");
     }
 
+    //passing the coopdates and coopdata form the API to populate the farmers Id//
     if(object.passCoopDates && object.passCoopData){
-    let i = 0;
-    let j = 0;
-    let days = [];
-    let found = 0;
-    let obj = object.passCoopData;
-    let dt= "";
-    let flag = 0;
-    let contacts = [];
-    let activeFarmers = 0;
+      let i = 0;
+      let j = 0;
+      let days = [];
+      let found = 0;
+      let obj = object.passCoopData;
+      let dt= "";
+      let flag = 0;
+      let contacts = [];
+      let activeFarmers = 0;
+  
+      for(i=0;i<obj.length;i++){//checking if the contact is equal to farmerId
+        let id = obj[i].farmerId;
+        // contacts.push(id);
+        for(j=0;j<=obj.length;j++){
+          if(contacts[j] === id){
+            flag = 1;
+            break;        
+          }  
+        }
+        if(flag === 0){//if the flage is o push the id into the contact array
+          contacts.push(id);
+        }
+        else{
+          flag = 0;
+        }
 
-    for(i=0;i<obj.length;i++){
-      let id = obj[i].farmerId;
-      // contacts.push(id);
-      for(j=0;j<=obj.length;j++){
-        if(contacts[j] === id){
-          flag = 1;
-          break;        
-        }  
-      }
-      if(flag === 0){
-        contacts.push(id);
-      }
-      else{
-        flag = 0;
-      }
+        }
 
-      }
-
-      if(contacts.length !== 0){
+        if(contacts.length !== 0){//check if the contact array is not eual to zero
         function addDays(date, days) {
           var result = new Date(date);
           result.setDate(result.getDate() + days);
           return result;
         }
-        for(i=0;i<contacts.length;i++){
+        for(i=0;i<contacts.length;i++){//loop though the array to get contacts Id
           let contact = contacts[i];
+          let contactActive = false;
+          let contactActiveCounter = 0;
+          let weekDelivery = 0;
+          let activeness = 0;
+          let inactiveFarmer = this.state.contacts;
 
-          let tempStartDate = startDate;
+          let tempStartDate = new Date(startDate);
           let tempEndDate = addDays(tempStartDate,7);
 
-          for(j=0;j<=obj.length;j++,tempStartDate = addDays(tempEndDate,1)){
-            tempEndDate = addDays(tempStartDate,7);          
-            console.log(tempStartDate, "----", tempEndDate);
+          for(j=0;j<=obj.length;j++,tempStartDate = addDays(tempEndDate,1)){//loop though the inner loop get set the temporary date and add 7 days 
+            tempEndDate = addDays(tempStartDate,7);
+            let lastWeekFlag = 1;
+            // console.log(tempStartDate, "----", tempEndDate);
+
+
             
-          }}     
+            for(let p=0;p<obj.length;p++){// loop the array to get the length of entry date time
+              let entryDateTime = new Date(obj[p].entryDateTime);
+              if(contact && contact === obj[p].farmerId && entryDateTime >= tempStartDate && entryDateTime <= tempEndDate){//checking if the contact is equal to farmerId and entry date time is greater or equal to temporary start and end date
+                if(lastWeekFlag === 1 || weekDelivery === 1){//checking for last week and this week delivery if is equal to 1, 0
+                  contactActiveCounter++;
+                  lastWeekFlag = 1;
+                  break;
+  
+                }else{
+                  lastWeekFlag = 0;
+                }
+                weekDelivery = 1
+              }else{
+                weekDelivery = 0;
+              }
+            }
+            
+        }
+
+
+        activeness = (contactActiveCounter/weeks)*100 //calculating the activeness of a farmer
+        activeness = Math.round(activeness); //rounding the whole number 
+        (activeness <60) ? activeFarmers = activeFarmers + 1 : activeFarmers = activeFarmers + 1;//checking if the farmer deliver over 60% of milk
+        inactiveFarmer = (this.state.contacts.length) - (activeFarmers);//calculating the inactive farmer 
+        //console.log("CONTACTS",this.state.contacts);
+
+
+        console.log("Farmer id = ",contact,"consistence detection = ",contactActiveCounter,"Consistence = ",activeness,"%");
+        console.log(activeFarmers,"Active farmers");  
+        console.log(inactiveFarmer,"Inactive farmer")    
+      }     
       }
-      console.log(contacts); 
+      // console.log(contacts); 
+      
 
+  
     }
-
-      // console.warn(obj[0].entryDateTime);
-
-      // for(i=0;i<obj.length;i++){
-      //   let yr = new Date(obj[i].entryDateTime).getFullYear();
-      //   let mt = new Date(obj[i].entryDateTime).getMonth();
-      //   let dy = new Date(obj[i].entryDateTime).getDate();
-      //   dt = yr+"-"+mt+"-"+dy;
-
-
-      //   for(j=0;j<=obj.length;j++){
-      //     if(days[j] === dt){
-      //       found = 1;
-      //       break;        
-      //     }  
-      //   }
-      //   if(found === 0){
-      //     days.push(dt);
-      //   }else{found = 0;
-      //   }
-
-      //   }
-    
-      //  console.log(days); 
-    
-
+  
   };
 
-// subtract(){
-//     let startDate = new Date(2018,5,21);
-//     let endDate = new Date(2018,12,31);
-//     let formateDate; 
-//     let dateRange;
-//     let weeks;
-
-//     dateRange = this.mydiff(startDate,endDate,"days");
-//     weeks = this.mydiff(startDate,endDate,"weeks");
-//     console.log(weeks);
-// };
 
   render(){
     const categories = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];

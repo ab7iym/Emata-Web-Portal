@@ -52,12 +52,11 @@ class NoOfDeliveriesDeliveryCard extends Component {
     let newState= this.state;
     let sortedDateArray = res;//this stores the dates from the API-endpoint to the state dates array(in date fomart)
     console.log("sorted-Object-Array: ",sortedDateArray);
+    
     for(let i=0; i<sortedDateArray.length; i++){//sorting the entries by date so as to get total deliveries in one day
       let entryDate = new Date(sortedDateArray[i].entryDateTime);//getting a new date from the array;
       let prevEntryDate = '';
-      //console.log("--------------------------------------------------------------------------------------------------------------------------------");
-      //console.log('sortarray length: '+sortedDateArray.length);
-      //console.log('forloop interation: '+i);
+      
       if(newState.entries.length>0){//check if the previous date entry already exists
         prevEntryDate=newState.entries[newState.entries.length-1].entryDateTime;
         //console.log('prev-new: '+prevEntryDate.getMonth()+'-'+entryDate.getMonth()+' '+prevEntryDate.getMonth()+'-'+entryDate.getMonth()+' '+prevEntryDate.getFullYear()+' '+entryDate.getFullYear());
@@ -79,6 +78,33 @@ class NoOfDeliveriesDeliveryCard extends Component {
         newState.entries[newState.entries.length] = {'entryDateTime': entryDate , 'noOfEntries': 1};
         //console.log("New Entries: ",newState.entries);
       }
+    }
+
+    if(sortedDateArray.length){//this condition is used to get data for the days when the delivery is 0(zero)
+      let firstDateOfEntry = new Date(newState.entries[0].entryDateTime);//this holds the date of the first entry made in the period selected
+      let lastDateOfEntry = new Date(newState.entries[newState.entries.length-1].entryDateTime);//this holds the date of the last entry made in the period selected
+      let noOfDays = (parseInt((lastDateOfEntry - firstDateOfEntry) / (24 * 3600 * 1000)))+2;//this gets the number of days between the dates
+      let allDatesInRange = [];
+      //console.log("firstDateOfEntry: ",firstDateOfEntry);console.log("lastDateOfEntry: ",lastDateOfEntry);
+      //console.log("noOfDays: ",noOfDays);
+      for(let i=0; i<noOfDays; i++){
+        let date = ''
+        if(i===0){date = new Date(firstDateOfEntry.setDate(firstDateOfEntry.getDate()));}
+        else {date = new Date(firstDateOfEntry.setDate(firstDateOfEntry.getDate()+1));} 
+        allDatesInRange.push({'entryDateTime': date , 'noOfEntries': 0});
+        //console.log("allDatesInRange-curr: ",allDatesInRange[i]);
+      }
+      //console.log("allDatesInRange-in-loop: ",allDatesInRange);
+      //*
+      for(let i=0; i<allDatesInRange.length; i++){
+        for(let r=0; r<newState.entries.length; r++){
+          if(allDatesInRange[i].entryDateTime.getDate()===newState.entries[r].entryDateTime.getDate() && allDatesInRange[i].entryDateTime.getMonth()===newState.entries[r].entryDateTime.getMonth() && allDatesInRange[i].entryDateTime.getFullYear()===newState.entries[r].entryDateTime.getFullYear() ){
+            allDatesInRange[i] = newState.entries[r];
+          }
+        }
+      }//*/
+      console.log("allDatesInRange: ",allDatesInRange);
+      newState.entries=allDatesInRange;
     }
     for(let i=0; i<newState.entries.length; i++){//loop to convert the entries array date to date.UTC
       let entryDate = new Date(newState.entries[i].entryDateTime);//getting a new date from the array;

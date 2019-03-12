@@ -38,6 +38,7 @@ class Login extends Component {
         this.showLoader = this.showLoader.bind(this);
         this.onShowAlert = this.onShowAlert.bind(this);
         this.onDismissAlert = this.onDismissAlert.bind(this);
+        this.setTokenCookie = this.setTokenCookie.bind(this);
     }
     login(){
        console.log(this.state);
@@ -87,14 +88,17 @@ class Login extends Component {
         }
         else{
             //this.props.passDetails(this.state.loginDetails);//passing login details to index component/parent
-            localStorage.setItem('cred',this.state.loginDetails);//passing login details to LocalStorage
-            console.log("---------------------renewTokenDetails login: ", this.state.loginDetails);
+            localStorage.setItem('ps',this.state.loginDetails.password);//passing login details to LocalStorage
+            localStorage.setItem('us',this.state.loginDetails.username);//passing login details to LocalStorage
+            console.log("---------------------renewTokenDetails login us: ", localStorage.getItem('us'));
+            console.log("---------------------renewTokenDetails login ps: ", localStorage.getItem('ps'));
             console.log("---------------------------------------");
+            this.setTokenCookie(serverResponse.accessToken);//this is used to save the token value in a cookie
             localStorage.setItem('Token',serverResponse.accessToken);//saving the token to local storage in the browser
             console.log("Access Token: "+serverResponse.accessToken);
             console.log("---------------------------------------");
-            localStorage.setItem('UserID',serverResponse.identityToken.userId);//saving the userID to local storage in the browser
-            console.log("User ID: "+serverResponse.identityToken.userId);
+            localStorage.setItem('UserId',serverResponse.userId);//saving the userId to local storage in the browser
+            console.log("UserId: "+serverResponse.userId);
             console.log("---------------------------------------");
             localStorage.setItem('FirstName',serverResponse.identityToken.firstName);//saving the first name to local storage in the browser
             console.log("First Name: "+serverResponse.identityToken.firstName);
@@ -121,6 +125,11 @@ class Login extends Component {
             console.log("Your password '"+this.state.loginDetails.password+"' is VALID.");
             return true;
         }
+    }
+    setTokenCookie(value){
+        let tokenExpDate=new Date();
+        tokenExpDate.setDate(tokenExpDate.getDate()+1);
+        document.cookie = "ac-tn="+value+"; expires="+tokenExpDate+";"
     }
     updateInputUser(event){//this function is called to update the state name of loginDetails object
         var abc = this.state.loginDetails;

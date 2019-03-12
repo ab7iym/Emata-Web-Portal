@@ -27,10 +27,12 @@ class NavBar extends Component {
     this.handleStartDateChange=this.handleStartDateChange.bind(this);
     this.handleEndDateChange=this.handleEndDateChange.bind(this);
     this.handleDefaultDateChange=this.handleDefaultDateChange.bind(this);
+    this.getCookie=this.getCookie.bind(this);
   }
 
   logout(){//this is the logout fuction
     localStorage.clear();//clearing the localstorage data
+    sessionStorage.clear();//clearing the localstorage data
     if(!localStorage.getItem("Token")){//checking if the token was cleared
       console.log("I was logged out");
       return (//returning to the login page
@@ -48,11 +50,16 @@ class NavBar extends Component {
   componentDidMount(){
     this.getCoopsList();
   }
+  getCookie(sKey) {//this fuction extracts the token value from the cookie storage
+    if (!sKey) { return null; }
+    return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
+  }
+
   getCoopsList(){//this function populates the coops list in the search bar
     console.log("getCoopsList function has been called");
     fetch('https://emata-crmservice-test.laboremus.no/api/organisation',{
         headers: {
-          'Authorization':'Bearer '+localStorage.getItem('Token'),
+          'Authorization':'Bearer '+this.getCookie("ac-tn"),
           'Transfer-Encoding': 'chunked',
           'Content-Type': 'application/json;charset=UTF-8',
           'Content-Encoding': 'gzip',
@@ -85,9 +92,10 @@ class NavBar extends Component {
         return(error);//reject(error);
     });
   }
+  
   handleStartDateChange(e){
     console.log(e.target.value);
-    localStorage.setItem('startDt-sl',e.target.value);
+    sessionStorage.setItem('startDt-sl',e.target.value);
     let newState = this.state;
     newState.startDate = String(e.target.value);
     this.setState(newState);
@@ -96,7 +104,7 @@ class NavBar extends Component {
   }
   handleEndDateChange(e){
     console.log(e.target.value);
-    localStorage.setItem('endDt-sl',e.target.value);
+    sessionStorage.setItem('endDt-sl',e.target.value);
     let newState = this.state;
     newState.endDate = String(e.target.value);
     this.setState(newState);
@@ -108,30 +116,30 @@ class NavBar extends Component {
     this.props.passDateSignal(startDate, endDate);//this passes the dates props to the parent component
   }
   date_1_DefaultDate(){
-    if(!localStorage.getItem('startDt-sl')){
+    if(!sessionStorage.getItem('startDt-sl')){
       var curr = new Date();
       console.log("Default Curr date: "+curr);
       curr.setDate(curr.getDate()-7);
       var date = curr.toISOString().substr(0,10);
-      localStorage.setItem('startDt-sl',date);
+      sessionStorage.setItem('startDt-sl',date);
       console.log("Default 1 date: "+date);
       return date
     }
-    else{return localStorage.getItem('startDt-sl');}
+    else{return sessionStorage.getItem('startDt-sl');}
   }
   date_2_DefaultDate(){
-    if(!localStorage.getItem('endDt-sl')){
+    if(!sessionStorage.getItem('endDt-sl')){
       var curr = new Date();
       curr.setDate(curr.getDate());
       var date = curr.toISOString().substr(0,10);
       console.log("Default 2 date: "+date);
-      localStorage.setItem('endDt-sl',date);
+      sessionStorage.setItem('endDt-sl',date);
       return date
     }
-    else{return localStorage.getItem('endDt-sl');}
+    else{return sessionStorage.getItem('endDt-sl');}
   }
   date_2_minDate(){
-    return localStorage.getItem('startDt-sl');
+    return sessionStorage.getItem('startDt-sl');
   }
   maxDate(){
     var curr = new Date();
@@ -201,7 +209,7 @@ class NavBar extends Component {
                   name="" 
                   onChange={(e) => this.handleStartDateChange(e)}
                   defaultValue={this.date_1_DefaultDate()} 
-                  min="2018-06-1" 
+                  min="2018-01-01" 
                   max={this.maxDate()}
               /> 
             </div>

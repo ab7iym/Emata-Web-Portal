@@ -75,7 +75,7 @@ class Payment extends Component {
  	render(){
  		//var org_data = localStorage.getItem('cp-sl');
  		//this.checkIdChange();
- 		let res=this.paymentMethod(this.state.paymentList)
+ 		let res=this.paymentMethod(this.state.paymentList);
  		const categories= ['Bank', 'Cash', 'MobileMoney'];
   		const labels= {style: {fontSize:'40px'}}
 	 	const plotOptions = {
@@ -95,7 +95,7 @@ class Payment extends Component {
 			    >
 			    <Chart />
 		          <XAxis categories={categories} lable = {labels}>
-		          	<XAxis.Title >Channels</XAxis.Title>
+		          	<XAxis.Title >Payment Channels</XAxis.Title>
 		          </XAxis>
 		          <YAxis>
 		          	<YAxis.Title >No. of farmers</YAxis.Title>

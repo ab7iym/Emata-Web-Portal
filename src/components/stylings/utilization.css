@@ -20,14 +20,14 @@
   margin-bottom: 5px
 }
 .contentUtilizationNumber1{
-  margin-top: 15px;
+  margin-top: 23px;
   margin-left: 32px;
   color: rgba(0,0,0,0.75);
   font-size: 1.7rem;
   font-weight: bold;
 }
 .contentUtilizationNumber2{
-  margin-top: 20px;
+  margin-top: 23px;
   margin-left: 30px;
   color: #1AB394;/*rgba(116,191,252,1.0);*/
   text-anchor: center;

@@ -22,6 +22,7 @@ class NavBar extends Component {
     this.maxDate=this.maxDate.bind(this);
     this.date_1_DefaultDate=this.date_1_DefaultDate.bind(this);
     this.date_2_DefaultDate=this.date_2_DefaultDate.bind(this);
+    this.date_1_minDate=this.date_1_minDate.bind(this);
     this.date_2_minDate=this.date_2_minDate.bind(this);
     this.onSelectCoop=this.onSelectCoop.bind(this);
     this.handleStartDateChange=this.handleStartDateChange.bind(this);
@@ -70,23 +71,43 @@ class NavBar extends Component {
     })
     .then(response=>response.json())
     .then(res=>{
-      console.log(res);
-      let newState = this.state;
-      newState.coops = [];
-      for (let i=0; i<res.length; i++) {
-        if(res[i].isMainBranch){//checking if the coop is the main branch
-          //this.state.coopsName.push(res[i].name);//this.state.coopsId.push(res[i].id);
-          newState.coops[i] = {'name':res[i].name,'id':res[i].id};
-          //this.state.coops.push({'name':res[i].name,'id':res[i].id});
-          //console.log(res[i].name);
+       if(!res){
+        console.log("--------------No response yet--------------");
+      }
+      else{
+        console.log("This is the feedback: ",res);
+        console.log("---------------------------------------");
+        console.log("Status: "+res.code);
+        if(res.code===400){//please try again later alert needed
+          alert('ERROR-CODE 400');
+        }
+        else if(res.code===500){
+          console.log("------------------ERROR-CODE 500---------------------");
+          console.log("StatusMessage: "+res.message);
+          this.getCoopsList();
+        }
+        else{
+          console.log(res);
+          let newState = this.state;
+          newState.coops = [];
+          for (let i=0; i<res.length; i++) {
+            if(res[i].isMainBranch){//checking if the coop is the main branch
+              newState.coops[i] = {'name':res[i].name,'id':res[i].id};
+            }
+          }
+          if(newState.coops.length>0){//this condition set the default value of the search input
+            console.log("---------------setting the defaultValue for search box-------------------");
+            if(sessionStorage.getItem('cp-sl-id')){//check if there was a particular coop selected(this helps retain the same coop when the page is refreshed)
+              this.props.passCoopSignal(sessionStorage.getItem('cp-sl-id'),sessionStorage.getItem('cp-sl-nm'));
+            }
+            else{
+              this.props.passCoopSignal(newState.coops[0].id,newState.coops[0].name);
+            }
+          }
+          this.setState(newState);
+          localStorage.setItem('cps',this.state.coops);
         }
       }
-      if(newState.coops.length>0){//setting the default value of the search input
-        console.log("---------------setting the defaultValue for search box-------------------");
-        this.props.passCoopSignal(newState.coops[0].id,newState.coops[0].name);
-      }
-      this.setState(newState);
-      localStorage.setItem('cps',this.state.coops);
     })
     .catch((error)=>{
         return(error);//reject(error);
@@ -129,18 +150,25 @@ class NavBar extends Component {
   }
   date_2_DefaultDate(){
     if(!sessionStorage.getItem('endDt-sl')){
-      var curr = new Date();
-      curr.setDate(curr.getDate());
-      var date = curr.toISOString().substr(0,10);
+      var currentDate = new Date();
+      currentDate.setDate(currentDate.getDate());
+      var date = currentDate.toISOString().substr(0,10);
       console.log("Default 2 date: "+date);
       sessionStorage.setItem('endDt-sl',date);
       return date
     }
     else{return sessionStorage.getItem('endDt-sl');}
   }
-  date_2_minDate(){
-    return sessionStorage.getItem('startDt-sl');
+  date_1_minDate(){
+    let minDate = new Date();
+    minDate.setDate(1);
+    minDate.setMonth(0);
+    minDate.setFullYear(2018);
+    minDate = minDate.toISOString().substr(0,10)
+    return minDate;
   }
+  date_2_minDate(){return sessionStorage.getItem('startDt-sl');}
+
   maxDate(){
     var curr = new Date();
     curr.setDate(curr.getDate());
@@ -151,98 +179,69 @@ class NavBar extends Component {
     if(obj.length>0){//this checks if the obj array has a value
       console.log('onSelectCoop.call ', obj);
       console.log('onSelectCoop.name ', obj[0].name);
-      //console.log('onSelectCoop.id ', obj[0].id);
       let newState = this.state;
       newState.coopSelected = obj[0].name;
       this.setState(newState);
-      localStorage.setItem('cp-sl-id',obj[0].id);//saving the selected coop id to the localStorage
-      localStorage.setItem('cp-sl-nm',obj[0].name);//saving the selected coop name to the localStorage
-      //console.log( 'coopSelected '+this.state.coopSelected);
+      sessionStorage.setItem('cp-sl-id',obj[0].id);//saving the selected coop id to the localStorage
+      sessionStorage.setItem('cp-sl-nm',obj[0].name);//saving the selected coop name to the localStorage
       this.props.passCoopSignal(obj[0].id,obj[0].name);
     }
   }
 
   render(){
-    //let coopList = this.getCoopsList();
     return (
       <div className="navBarStyle2">
-            {/*this.getCoopsList()*/}
-            <img className="navLogo2" src={require("./images/emata-logo.png")} alt={"logo"}/>
-            <div className="pageName2">Dashboard</div>
-            <Typeahead 
-              bsSize = 'sm'
-              className="navBarSearch2"
-              labelKey="name"
-              caseSensitive = {false}
-              onChange={(e)=>this.onSelectCoop(e)}
-              options={this.state.coops}
-              placeholder="search coops..."
-              emptyLabel="no match found"
-              selectHintOnEnter={true}
-            />
-            {/*<Autocomplete
-              value={ this.state.value }
-              inputProps={{ id: 'states-autocomplete' }}
-              wrapperStyle={{ position: 'relative', display: 'inline-block' }}
-              items={ this.state.coops }
-              getItemValue={ item => item.name }
-              onChange={(event, value) => this.setState({ value }) }
-              onSelect={ value => this.setState({ value }) }
-              renderMenu={ children => (
-                <div className = "menu">
-                  { children }
-                </div>
-              )}
-              renderItem={ (item, isHighlighted) => (
-                <div
-                  className={`item ${isHighlighted ? 'item-highlighted' : ''}`}
-                  key={ item.abbr } >
-                  { item.name }
-                </div>
-              )}
-            />*/}
-            <div className="dateBackground2">
-              <input 
-                  id="myDate" 
-                  type="date" 
-                  className="dateBox2" 
-                  name="" 
-                  onChange={(e) => this.handleStartDateChange(e)}
-                  defaultValue={this.date_1_DefaultDate()} 
-                  min="2018-01-01" 
-                  max={this.maxDate()}
-              /> 
-            </div>
-            <label className="to2"> to </label>
-            <div className="dateBackground2">
-              <input 
-                  type="date" 
-                  className="dateBox2" 
-                  name="" 
-                  onChange={(e) => this.handleEndDateChange(e)} 
-                  defaultValue={this.maxDate()} 
-                  min={this.date_2_minDate()}
-                  max={this.maxDate()}
-              /> 
-            </div>
+        <img className="navLogo2" src={require("./images/emata-logo.png")} alt={"logo"}/>
+        <div className="pageName2">Dashboard</div>
+        <Typeahead 
+          bsSize = 'sm'
+          className="navBarSearch2"
+          labelKey="name"
+          caseSensitive = {false}
+          onChange={(e)=>this.onSelectCoop(e)}
+          options={this.state.coops}
+          placeholder="search coops..."
+          emptyLabel="no match found"
+          selectHintOnEnter={true}
+        />
+        <div className="dateBackground2">
+          <input 
+              id="myDate" 
+              type="date" 
+              className="dateBox2" 
+              name="" 
+              onChange={(e) => this.handleStartDateChange(e)}
+              defaultValue={this.date_1_DefaultDate()} 
+              min={this.date_1_minDate()} 
+              max={this.maxDate()}
+          /> 
+        </div>
+        <label className="to2"> to </label>
+        <div className="dateBackground2">
+          <input 
+              type="date" 
+              className="dateBox2" 
+              name="" 
+              onChange={(e) => this.handleEndDateChange(e)} 
+              defaultValue={this.maxDate()} 
+              min={this.date_2_minDate()}
+              max={this.maxDate()}
+          /> 
+        </div>
 
-            {this.handleDefaultDateChange(this.date_1_DefaultDate(),this.date_2_DefaultDate())}
-            
-            <img className="navBarUsernameIcon" src={require("./icons/userIcon3.png")} alt={"userIcon"}/>
-            <div className="usernameLabel2">{localStorage.getItem("FirstName")}</div>
-            <button className="navBarSignOutButton2" onClick={this.logout}>
-              <div>
-                <div className="usernameLabel2">Sign out</div>            
-                <img className="navBarLogoutIcon" src={require("./icons/logoutIcon2.png")} alt={"userIcon"}/>
-              </div>
-            </button>
+        {this.handleDefaultDateChange(this.date_1_DefaultDate(),this.date_2_DefaultDate())}
+        
+        <img className="navBarUsernameIcon" src={require("./icons/userIcon3.png")} alt={"userIcon"}/>
+        <div className="usernameLabel2">{localStorage.getItem("FirstName")}</div>
+        <button className="navBarSignOutButton2" onClick={this.logout}>
+          <div>
+            <div className="usernameLabel2">Sign out</div>
+            <img className="navBarLogoutIcon" src={require("./icons/logoutIcon2.png")} alt={"userIcon"}/>
+          </div>
+        </button>
       </div>
     );
   }
 }
 
 export default NavBar;
-
-/*(event) => {this.setState({startDate: event.target.value})
-                console.log(event.target) 
-                console.log("startDate Change: "+ this.state.startDate)}*/

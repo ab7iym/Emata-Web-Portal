@@ -15,10 +15,11 @@ class DeliveryCard extends Component {
         tab1: true,
         tab2: false,
         tab3: false,
-        actTab1: 'activeDeliveryButtons',
-        actTab2: 'inactiveDeliveryButtons',
-        actTab3: 'inactiveDeliveryButtons'
+        actTab1: 'rgba(0, 0, 0, 0.15)',//'#9ED4E6',//activeDeliveryButtons
+        actTab2: 'rgba(255, 255, 255,0.4)',//inactiveDeliveryButtons
+        actTab3: 'rgba(255, 255, 255,0.4)'//inactiveDeliveryButtons
       },
+      bgColor: '',
       dateRangeEntries: ''
     }
     this.showGraph=this.showGraph.bind(this);
@@ -29,10 +30,10 @@ class DeliveryCard extends Component {
   updateTheState(number){//this function is called to update the state name of loginDetails object
       var abc = this.state.tabs;
       abc.tab1 = false; abc.tab2 = false; abc.tab3 = false;
-      abc.actTab1 = 'inactiveDeliveryButtons'; abc.actTab2 = 'inactiveDeliveryButtons'; abc.actTab3 = 'inactiveDeliveryButtons'
-      if(number===1){abc.tab1=true; abc.actTab1='activeDeliveryButtons'}
-      else if(number===2){abc.tab2=true; abc.actTab2='activeDeliveryButtons'}
-      else if(number===3){abc.tab3=true; abc.actTab3='activeDeliveryButtons'}
+      abc.actTab1 = 'rgba(255, 255, 255,0.4)'; abc.actTab2 = 'rgba(255, 255, 255,0.4)'; abc.actTab3 = 'rgba(255, 255, 255,0.4)';
+      if(number===1){abc.tab1=true; abc.actTab1='rgba(0, 0, 0, 0.15)'}
+      else if(number===2){abc.tab2=true; abc.actTab2='rgba(0, 0, 0, 0.15)'}
+      else if(number===3){abc.tab3=true; abc.actTab3='rgba(0, 0, 0, 0.15)'}
       this.setState({tabs: abc});
       console.log(this.state.tabs);
   }
@@ -68,15 +69,35 @@ class DeliveryCard extends Component {
     return(
       <div>
         <div className="buttonsRow">
-            <button className='activeDeliveryButtons' onClick={(e)=>{e.preventDefault();this.updateTheState(1)}}>No. of deliveries</button>
-            <button className='inactiveDeliveryButtons' onClick={(e)=>{e.preventDefault();this.updateTheState(2)}}>Ave. delivery size</button>
-            <button className='inactiveDeliveryButtons' onClick={(e)=>{e.preventDefault();this.updateTheState(3)}}>Amt. of milk deliveries</button>
+          <div className="btn-group-sm" role="group" aria-label="Basic example">
+            <button type="button" 
+              className="activeDeliveryButtons"
+              onClick={(e)=>{e.preventDefault();this.updateTheState(1)}} 
+              style={{background:this.state.tabs.actTab1}}
+            >
+              No. of deliveries
+            </button>
+            <button type="button" 
+              className="inactiveDeliveryButtons"
+              onClick={(e)=>{e.preventDefault();this.updateTheState(2)}}
+              style={{background:this.state.tabs.actTab2}}
+            >
+              Ave. delivery size
+            </button>
+            <button type="button" 
+              className="inactiveDeliveryButtons"
+              onClick={(e)=>{e.preventDefault();this.updateTheState(3)}}
+              style={{background:this.state.tabs.actTab3}}
+            >
+              Amt. milk deliveries
+            </button>
+          </div>
         </div>
         {this.checkStateChange()}
       </div>
     );
   } 
 }
-//(e)=>{e.preventDefault(); is used to prevent the onClick function from running by default/when the page loads/reloads
 export default withHighcharts(DeliveryCard, Highcharts);
+//(e)=>{e.preventDefault(); is used to prevent the onClick function from running by default/when the page loads/reloads
 

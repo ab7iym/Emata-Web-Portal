@@ -23,10 +23,6 @@ class FarmersCard extends Component {
       },
       Gduration: 1500
     };
-    //  this.getContactsData = this.getContactsData.bind(this);
-    //  this.getLedgerData = this.getLedgerData.bind(this);
-    //  this.handleFarmersGraph = this.handleFarmersGraph.bind(this);
-    //  this.setFarmersGraphData= this.setFarmersGraphData.bind(this);
   }
 
   //calcaulating the number of days within the range
@@ -60,11 +56,6 @@ class FarmersCard extends Component {
 		newState.object = newProp;
     return newState;
 	}
-
-  componentDidMount(){
-    //this.setgraphData(this.props);
-    this.handleFarmersGraph(this.props);
-  }
 
   setgraphData = (object,activeFarmersList) =>{
     console.log("OBJECT RECEIVED: ",object);
@@ -108,22 +99,15 @@ class FarmersCard extends Component {
           prevEntryDate=graphData[graphData.length-1].entryDateTime;
           //console.log('prev-new: '+prevEntryDate.getMonth()+'-'+entryDate.getMonth()+' '+prevEntryDate.getMonth()+'-'+entryDate.getMonth()+' '+prevEntryDate.getFullYear()+' '+entryDate.getFullYear());
         }
-        
         if(graphData.length===0){//check if the array has no value and add a value in the first position
-          //console.log('array start');
           graphData[graphData.length] = {'entryDateTime': entryDate , 'noOfEntries': 1};
-          //console.log("Entries: ",newState.entries);
         }
         //Adding Entries of the same date
         else if((prevEntryDate.getDate()===entryDate.getDate()) && (prevEntryDate.getMonth()===entryDate.getMonth()) && (prevEntryDate.getFullYear()===entryDate.getFullYear())){
-          //console.log('array adding');
           graphData[(graphData.length)-1] = {'entryDateTime': entryDate , 'noOfEntries': (graphData[graphData.length-1].noOfEntries)+1};
-          //console.log("Adding Entries: ",newState.entries);
         }
         else{//add a new entry to array
-          //console.log('array new');
           graphData[graphData.length] = {'entryDateTime': entryDate , 'noOfEntries': 1};
-          //console.log("New Entries: ",newState.entries);
         }
       }
     }
@@ -139,10 +123,7 @@ class FarmersCard extends Component {
         if(i===0){date = new Date(firstDateOfEntry.setDate(firstDateOfEntry.getDate()));}
         else {date = new Date(firstDateOfEntry.setDate(firstDateOfEntry.getDate()+1));} 
         allDatesInRange.push({'entryDateTime': date , 'noOfEntries': 0});
-        //console.log("allDatesInRange-curr: ",allDatesInRange[i]);
       }
-      //console.log("allDatesInRange-in-loop: ",allDatesInRange);
-      //*
       for(let i=0; i<allDatesInRange.length; i++){
         for(let r=0; r<graphData.length; r++){
           if(allDatesInRange[i].entryDateTime.getDate()===graphData[r].entryDateTime.getDate() && allDatesInRange[i].entryDateTime.getMonth()===graphData[r].entryDateTime.getMonth() && allDatesInRange[i].entryDateTime.getFullYear()===graphData[r].entryDateTime.getFullYear()){
@@ -154,36 +135,6 @@ class FarmersCard extends Component {
       graphData=allDatesInRange;
     }
 
-    // for(temporaryDate = new Date(getstartDate);temporaryDate.getFullYear()<=endDateYear && temporaryDate.getMonth()<=endDateMonth && temporaryDate.getDate()<=endDateDate; temporaryDate = addDays(temporaryDate,1)){
-    //   console.log('---------------------------jhsggdflielvf-------------------------');
-    //   console.log("temporaryDate: ",temporaryDate);
-    //   counter = 0;
-    //   let year1 = temporaryDate.getFullYear();
-    //   let month1 = temporaryDate.getMonth();
-    //   let day1 = temporaryDate.getDay();
-
-      // for(let i = 0; i < obj.length; i++){
-      //   let deliveries = new Date(obj[i].entryDateTime);
-      //   let year2 = deliveries.getFullYear();
-      //   let month2 = deliveries.getMonth();
-      //   let day2 = deliveries.getDay();
-
-      //   if(year1 === year2 && month1 === month2 && day1 === day2){
-      //     console.log("activeFarmersList.lenth: ",this.state.activeFarmersList.length);
-      //     console.log("obj[i].farmerId: ",obj[i].farmerId);
-      //     for(let x=0; x<this.state.activeFarmersList.length; x++){
-      //       if(obj[i].farmerId===this.state.activeFarmersList[x]){
-      //         console.log("CONDITION PASSED");
-      //         counter++;
-      //         graphData.push({'date': temporaryDate,'data' : counter});
-      //       }
-      //       else{
-      //         graphData.push({'date': temporaryDate,'data' : 0});
-      //       }
-      //     }
-      //   }
-      // }
-    // }
     for(let i=0; i<graphData.length; i++){//loop to convert the entries array date to date.UTC
       let entryDate = new Date(graphData[i].entryDateTime);//getting a new date from the array;
       graphData[i] = [Date.UTC(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate()) , graphData[i].noOfEntries]
@@ -269,7 +220,6 @@ class FarmersCard extends Component {
           for(j=0;j<=obj.length;j++,tempStartDate = addDays(tempEndDate,1)){//loop though the inner loop get set the temporary date and add 7 days 
             tempEndDate = addDays(tempStartDate,7);
             let lastWeekFlag = 1;
-            // console.log(tempStartDate, "----", tempEndDate);
             for(p=0;p<obj.length;p++){// loop the array to get the length of entry date time
               let entryDateTime = new Date(obj[p].entryDateTime);
               if(contact && contact === obj[p].farmerId && entryDateTime >= tempStartDate && entryDateTime <= tempEndDate){//checking if the contact is equal to farmerId and entry date time is greater or equal to temporary start and end date
@@ -295,7 +245,6 @@ class FarmersCard extends Component {
           if (activeness <60) activeFarmers = activeFarmers
           else{activeFarmers = activeFarmers + 1; activeFarmersList.push(contact)};//checking if the farmer deliver is over 60%
           inactiveFarmers = (this.state.contacts.length) - (activeFarmers);//calculating the inactive farmer 
-          //console.log("CONTACTS",this.state.contacts);
           console.log("activeFarmersList: ", activeFarmersList)
           console.log("Farmer id = ",contact,"consistence detection = ",contactActiveCounter,"Consistence = ",activeness,"%");
           console.log(activeFarmers,"Active farmers");  

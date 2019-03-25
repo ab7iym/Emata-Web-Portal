@@ -2,84 +2,88 @@ import React, { Component } from 'react';
 import 'react-dom';
 import './stylings/deliveryAmounts-noOfDeliveries.css';
 import Highcharts from 'highcharts';
-import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, ColumnSeries, SplineSeries} from 'react-jsx-highcharts';
+import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, SplineSeries} from 'react-jsx-highcharts';
 
 class NoOfDeliveriesDeliveryCard extends Component {
   constructor(props){
     super(props)
     this.state = {
+      dateRangeEntries: [],
       entries: [],
-      dates: [],
-      Gduration: 1500
+      Gduration: 1500,
+      dateTimeLabelFormats: {
+        second: '%Y-%m-%d<br/>%H:%M:%S',
+        minute: '%Y-%m-%d<br/>%H:%M',
+        hour: '%Y-%m-%d<br/>%H:%M',
+        day: '%Y<br/>%m-%d',
+      }
     }
     this.getCoopsData=this.getCoopsData.bind(this);
-    this.calcDate=this.calcDate.bind(this);
+    //this.calcDate=this.calcDate.bind(this);
   }
 
   componentDidMount(){
-    {this.calcDate(localStorage.getItem('startDt-sl'), localStorage.getItem('endDt-sl'))}
+    let newState = this.state;
+    newState.dateRangeEntries = this.props.passCoopData;
+    this.setState(newState);
+    this.getCoopsData(this.props.passCoopData);
   }
 
-  calcDate(startDate,endDate){
-    var start = new Date(startDate);
-    var end = new Date(endDate);
-    let noOfDays = parseInt((end - start) / (24 * 3600 * 1000));//this gets the number of days between the dates
-    console.log("No. of Days: "+noOfDays);
-    var loopDate  = new Date(startDate); //Month is 0-11 in JavaScript
-    let milkDeliveries = [];
+  getCoopsData(res){//this function populates the coops list in the search bar
     let newState= this.state;
-
-    for(let i=0; i<=noOfDays; i++){
-      loopDate.setDate(start.getDate()+i);
-      console.log("Loop Date: "+loopDate.toDateString()); 
-      let sendDate = loopDate.getFullYear()+"-"+(loopDate.getMonth()+1)+"-"+loopDate.getDate();
-      console.log("sendDate: "+sendDate); 
-      milkDeliveries[milkDeliveries.length]= this.getCoopsData(localStorage.getItem('cp-sl-id'),sendDate,endDate)
+    let sortedDateArray = res;//this stores the dates from the API-endpoint to the state dates array(in date fomart)
+    for(let i=0; i<sortedDateArray.length; i++){//sorting the entries by date so as to get total deliveries in one day
+      let entryDate = new Date(sortedDateArray[i].entryDateTime);//getting a new date from the array;
+      let prevEntryDate = '';
+      
+      if(newState.entries.length>0){//check if the previous date entry already exists
+        prevEntryDate=newState.entries[newState.entries.length-1].entryDateTime;
+      }
+      
+      if(newState.entries.length===0){//check if the array has no value and add a value in the first position
+        newState.entries[newState.entries.length] = {'entryDateTime': entryDate , 'noOfEntries': 1};
+      }
+      //Adding Entries of the same date
+      else if((prevEntryDate.getDate()===entryDate.getDate()) && (prevEntryDate.getMonth()===entryDate.getMonth()) && (prevEntryDate.getFullYear()===entryDate.getFullYear())){
+        newState.entries[(newState.entries.length)-1] = {'entryDateTime': entryDate , 'noOfEntries': (newState.entries[newState.entries.length-1].noOfEntries)+1};
+      }
+      else{//add a new entry to array
+        newState.entries[newState.entries.length] = {'entryDateTime': entryDate , 'noOfEntries': 1};
+      }
     }
-    console.log("milkDeliveries: ",milkDeliveries); 
-    console.log("Loop months: "+loopDate.getMonth()); 
-    console.log("Loop Date: "+loopDate.toDateString()); //displays date
-  }
-  getCoopsData(id,startDate,endDate){//this function populates the coops list in the search bar
-    //this.calcDate(startDate,endDate);
-    console.log("getCoopsData function has been called");
-    const r = fetch('https://emata-ledgerservice-test.laboremus.no/api/ledger/ledger-summary?organisationId='+id+'&date='+startDate,{
-        headers: {
-          'Authorization':'Bearer '+localStorage.getItem('Token'),
-          'Transfer-Encoding': 'chunked',
-          'Content-Type': 'application/json;charset=UTF-8',
-          'Content-Encoding': 'gzip',
-          'Vary':'Accept-Encoding',
-          'X-Content-Type-Options':'nosniff',
-        },
-        method: 'GET'
-    })
-    .then(response=>response.json())
-    .then(res=>{
-      console.log(res);
-      console.log("the deliveries: "+res.totalMilkDelivered);
 
-      //*
-      let newState= this.state;
-      newState.entries[newState.entries.length] = res.totalMilkDelivered;
-      let entryDate=new Date(res.dateFrom)
-      console.log("entry dates: "+entryDate.getDate()+"-"+(entryDate.getMonth()+1)+"-"+entryDate.getFullYear());
-      newState.dates[newState.dates.length] = entryDate.getDate()+"-"+(entryDate.getMonth()+1)+"-"+entryDate.getFullYear();//res.dateFrom;
-      newState.Gduration = newState.Gduration+0.0001;
-      this.setState(newState);
-      console.log("state: ", this.state);//*/
+    if(sortedDateArray.length){//this condition is used to get data for the days when the delivery is 0(zero)
+      let firstDateOfEntry = new Date(newState.entries[0].entryDateTime);//this holds the date of the first entry made in the period selected
+      let lastDateOfEntry = new Date(newState.entries[newState.entries.length-1].entryDateTime);//this holds the date of the last entry made in the period selected
+      let noOfDays = (parseInt((lastDateOfEntry - firstDateOfEntry) / (24 * 3600 * 1000)))+2;//this gets the number of days between the dates
+      let allDatesInRange = [];
+      for(let i=0; i<noOfDays; i++){
+        let date = ''
+        if(i===0){date = new Date(firstDateOfEntry.setDate(firstDateOfEntry.getDate()));}
+        else {date = new Date(firstDateOfEntry.setDate(firstDateOfEntry.getDate()+1));} 
+        allDatesInRange.push({'entryDateTime': date , 'noOfEntries': 0});
+      }
+      for(let i=0; i<allDatesInRange.length; i++){
+        for(let r=0; r<newState.entries.length; r++){
+          if(allDatesInRange[i].entryDateTime.getDate()===newState.entries[r].entryDateTime.getDate() && allDatesInRange[i].entryDateTime.getMonth()===newState.entries[r].entryDateTime.getMonth() && allDatesInRange[i].entryDateTime.getFullYear()===newState.entries[r].entryDateTime.getFullYear() ){
+            allDatesInRange[i] = newState.entries[r];
+          }
+        }
+      }
+      newState.entries=allDatesInRange;
+    }
+    for(let i=0; i<newState.entries.length; i++){//loop to convert the entries array date to date.UTC
+      let entryDate = new Date(newState.entries[i].entryDateTime);//getting a new date from the array;
+      newState.entries[i] = [Date.UTC(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate()) , newState.entries[i].noOfEntries]
+    }
+    newState.Gduration = newState.Gduration+0.0001;
+    this.setState(newState);
+  };
 
-      return res.totalMilkDelivered;
-    })
-    .catch((error)=>{
-        return(error);//reject(error);
-    });
-  }
   render(){
-     //{this.getCoopsData(localStorage.getItem('cp-sl'),"2019-02-11","2019-02-11")}
-    const labels= {style: {fontSize:'40px'}}
     const plotOptions = { series: {animation:{duration: this.state.Gduration}}};
     var tooltip = {valueSuffix: ''}
+
     return(
         <HighchartsChart  
           className="noOfDeliveriesdeliveryGraph"
@@ -89,12 +93,12 @@ class NoOfDeliveriesDeliveryCard extends Component {
         >
           <Chart />
           <Title></Title>
-          <XAxis categories={this.state.dates} lable = {labels}>
-            <XAxis.Title>Days</XAxis.Title>
+          <XAxis type = 'datetime' dateTimeLabelFormats={this.state.dateTimeLabelFormats}>
+            <XAxis.Title>Date</XAxis.Title>
+            <SplineSeries name="deliveries" data= {this.state.entries} />
           </XAxis>
           <YAxis>
             <YAxis.Title>No. of Deliveries</YAxis.Title>
-            <SplineSeries name="deliveries" data= {this.state.entries} />
           </YAxis>
         </HighchartsChart>
     );
@@ -102,4 +106,3 @@ class NoOfDeliveriesDeliveryCard extends Component {
 }
 
 export default withHighcharts(NoOfDeliveriesDeliveryCard, Highcharts);
-

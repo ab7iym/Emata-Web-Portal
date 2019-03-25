@@ -3,7 +3,14 @@ import {Redirect} from 'react-router-dom';
 import PropTypes from "prop-types";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
-import LinearProgress from '@material-ui/core/LinearProgress';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import withMobileDialog from '@material-ui/core/withMobileDialog';
+import Loader from './components/loadingDashBoard';
 import NavbarV2 from "./components/NavbarV2";
 import MonthlyOverview from './components/monthlyOverview';
 import DeliveryAmounts from './components/deliveryAmounts';
@@ -13,89 +20,335 @@ import UtilizationRate from './components/utilizationRate';
 import './stylings/dashboard.css';
 
 class FullWidthGrid extends React.Component{
-    constructor(props){
-      super(props);
-      this.state={
-        coopId: "",
-        coopName : localStorage.getItem('cp-sl-nm'),
-        completed: 0,
-        buffer: 10,
-      }
+  constructor(props){
+    super(props);
+    this.state={
+      coopId: "",
+      coopName: '',//localStorage.getItem('cp-sl-nm'),
+      startDate: '',
+      endDate: '',
+      entries: '',
+      dateRangeEntries: [],
+      renewTokenDetails: {username: '', password: '', clientId:'backoffice', clientSecret:'backoffice@lug'},
+      paymentMethodData: [],
+      farmerGraphData: {entries: '', startDate: '', endDate: '', contacts: ''},
+      showLoader: false,
+      open: false //this holds the state to either show or hide the Error dialog box 
     }
-    handleCoopSignal=(id,name)=>{
-      alert(id+" "+name);
-      this.setState({coopId : id});
-      this.setState({coopName : name});
-    };
+    this.renewToken= this.renewToken.bind(this);
+    this.verification=this.verification.bind(this);
+    this.getCoopsData=this.getCoopsData.bind(this);
+    this.getDataByDateRange=this.getDataByDateRange.bind(this);
+    this.paymentMethod=this.paymentMethod.bind(this);
+    this.getCookie=this.getCookie.bind(this);
+    this.setTokenCookie = this.setTokenCookie.bind(this);
+    this.getContactsData = this.getContactsData.bind(this);
+  }
+  handleClickOpen = () => {//this handles the show error dialog box event
+    if(this.state.open===false){this.setState({ open: true });}
+  };
+  handleClose = () => {//this handles the close error dialog box event
+    if(this.state.open===true){this.setState({ open: false });}
+  };
+  handleCoopSignal=(id,name)=>{
+    let newState=this.state;
+    newState.coopId=id;
+    newState.coopName= name;
+    newState.showLoader=true;
+    this.setState(newState);
+    //get the whole time range of the data needed from the 1st of the previous year to the current date
+    let end = new Date();
+    let start = new Date();
+    start.setDate(1);
+    start.setMonth(0);
+    start.setFullYear(end.getFullYear()-1);
+    this.paymentMethod(this.state.coopId);
+    this.getContactsData(this.state.coopId);
+    this.getCoopsData(this.state.coopId,start,end,this.state.startDate,this.state.endDate);//start and end are the dates used to populate the milk collections card
+  };
+  handleDateSignal=(startDate,endDate)=>{//this handles the Date signal from the navBar component
+    if(this.state.startDate!==startDate || this.state.endDate!==endDate){//checking if there has been a difference between the set dates and already stored dates(in state)
+      let end = new Date(); let start = new Date(); let startDateCheck = new Date(startDate);let stateDateCheck = new Date(this.state.startDate);
+      start.setDate(1);start.setMonth(0);start.setFullYear(end.getFullYear()-1);
+      let newState=this.state;
+      newState.startDate=startDate;
+      newState.endDate=endDate;
+      newState.farmerGraphData.startDate=startDate;
+      newState.farmerGraphData.endDate=endDate;
 
-    componentDidMount(){this.timer = setInterval(this.progress, 500);}
-
-    componentWillUnmount(){clearInterval(this.timer);}
-
-    progress = () => {
-      const { completed } = this.state;
-      if (completed > 100) {
-        this.setState({ completed: 0, buffer: 10 });
-      } else {
-        const diff = Math.random() * 10;
-        const diff2 = Math.random() * 10;
-        //this.setState({ completed: completed + diff, buffer: completed + diff + diff2 });
-      }
-    };
-
-    render(){
-      let classes = this.props;
-      if(!localStorage.getItem("Token")){
-        return (<Redirect exact to={'/'}/>)
+      if(startDateCheck.getFullYear()<start.getFullYear() && startDateCheck.getFullYear()<stateDateCheck.getFullYear()){//this checks if the selected date is beyond the date of the data collected before
+        this.setState(newState);
+        this.getCoopsData(this.state.coopId,startDate,end,startDate,endDate);
       }
       else{
-        return <div>
-          <NavbarV2 passCoopSignal={(id,name)=>this.handleCoopSignal(id,name)}/>
-          <LinearProgress color="secondary" variant="buffer" value={this.state.completed} valueBuffer={this.state.buffer} />
-          <div className="dashboardGraphContainer">
-            <div className={classes.root}>
-              <Grid container spacing={24}>
-                <Grid item xs={1} sm={12}>
-                  <Paper className="titleCard">
-                    <p className="title">{this.state.coopName}</p>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper className="monthlyOVCard">
-                    <p className="cardNames">Milk collections</p>
-                    <MonthlyOverview/>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper className="deliveryDetailsCard">
-                    <p className="cardNames">Deliveries</p>
-                    <DeliveryAmounts/>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper className="farmersCard">
-                    <p className="cardNames">Farmers</p>
-                    <Farmers/>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={3} lg={2}>
-                  <Paper className="utilizationCard">
-                    <p className="utilizationcardName">Utilization Rate</p>
-                    <UtilizationRate/>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Paper className="paymentCard">
-                    <p className="cardNames">Payments</p>
-                    <Payment />
-                  </Paper>
-                </Grid>
-              </Grid>
-            </div>;
-          </div>
-        </div>
+        let dataRange=this.getDataByDateRange(newState.entries,startDate,endDate);
+        newState.dateRangeEntries = dataRange;
+        newState.farmerGraphData.entries = dataRange;
+        this.setState(newState);
+       }
+      //newState.showLoader=true;
+    }
+  };
+  showLoader(){
+    if(this.state.showLoader){return <Loader/>}
+  }
+  getCookie(sKey) {//this fuction extracts the token value from the cookie storage
+    if (!sKey) { return null; }
+    return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
+  }
+  setTokenCookie(value){//this function save the token in cookie storage
+    let tokenExpDate=new Date();
+    tokenExpDate.setDate(tokenExpDate.getDate()+1);//this is used to set the expiry date of the cookie/token(86400 sec = 1 day);
+    document.cookie = "ac-tn="+value+"; expires="+tokenExpDate+";"
+  }
+  //*
+  componentDidMount(){
+    this.timer = setInterval(this.renewToken, 85000000);//this timer is set to run the renewToken function to get a new token when time expires
+    let newState=this.state;
+    newState.renewTokenDetails.password=localStorage.getItem('ps');
+    newState.renewTokenDetails.username=localStorage.getItem('us');
+    this.setState(newState);
+    localStorage.removeItem('ps');
+    localStorage.removeItem('us');
+  }
+  componentWillUnmount(){clearInterval(this.timer);}
+
+  renewToken(){
+    fetch('https://emata-authservice-test.laboremus.no/users/login',{
+        headers: {
+          'Access-Control-Allow-Origin':'http://localhost:3000/',
+          'Accept':'application/json',
+          'Content-Type':'application/json',//'application/x-www-form-urlencoded',//'application/json;charset=UTF-8',
+          'Content-Encoding':'gzip',
+          'Access-Control-Allow-Headers':'Origin, Authorization, X-Requested-With, Content-Type, Accept, Cache-Control',
+          'Access-Control-Allow-Credentials':'true',
+          'Access-Control-Allow-Methods':'POST',
+          'Transfer-Encoding': 'chunked',
+          'Vary':'Accept-Encoding',
+          'X-Content-Type-Options':'nosniff',
+        },
+        method:'POST',
+        body: JSON.stringify(this.state.renewTokenDetails)
+    })
+    .then(response=>response.json())
+    .then(res=>{
+      //this.verification(res);
+      if(res.code===500){this.renewToken();}
+      else {this.verification(res);}
+    })
+  }
+  verification(serverResponse){
+    if(!serverResponse){
+      this.handleClickOpen();
+    }
+    else{
+      if(serverResponse.code===400){//please try again later alert needed
+        alert('ERROR-CODE 400');
+      }
+      else{
+        this.setTokenCookie(serverResponse.accessToken);//this is used to save the token value in a cookie
       }
     }
+  }
+  getCoopsData(id,startDate,endDate,startDateRange,endDateRange){//this function populates the coops list in the search bar
+    fetch('https://emata-ledgerservice-test.laboremus.no/api/ledger/ledger-entries-in-period?organisationId='+id+'&entryType=1'+'&startDate='+startDate+'&endDate='+endDate,{
+      headers: {
+        'Authorization':'Bearer '+this.getCookie("ac-tn"),
+        'Transfer-Encoding': 'chunked',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Content-Encoding': 'gzip',
+        'Vary':'Accept-Encoding',
+        'X-Content-Type-Options':'nosniff',
+      },
+      method: 'GET'
+    })
+    .then(response=>response.json())
+    .then(res=>{
+      if(!res){
+        this.handleClickOpen();
+      }
+      else{
+        if(res.code===400){//please try again later alert needed
+          this.handleClickOpen();
+        }
+        else if(res.code===500){
+          this.getCoopsData(id,startDate,endDate,startDateRange,endDateRange);
+        }
+        else{
+          let newState= this.state;
+          let sortedDateArray=[];
+          let dataRange='';
+          sortedDateArray = res.farmerLedgerEntries;//this stores the data of only the farmers' entries
+          sortedDateArray.sort(function(a,b){return new Date(a.entryDateTime) - new Date(b.entryDateTime)});
+          dataRange=this.getDataByDateRange(sortedDateArray,startDateRange,endDateRange);//sorting by the date range and assigning it to dateRange
+          newState.Gduration = newState.Gduration+0.0001;
+          newState.showLoader = false;//turning off the loader component
+          newState.entries = sortedDateArray;
+          newState.dateRangeEntries = dataRange;
+          newState.farmerGraphData.entries = dataRange;
+          localStorage.setItem('dateRangeEntries', newState.dateRangeEntries);
+          this.setState(newState);
+        }
+      }
+    })
+    .catch((error)=>{
+        alert('UNKOWN ERROR - Please refresh this page');
+        return(error);//reject(error);
+    });
+  }
+  getDataByDateRange(sortedDateArray,startDate,endDate){
+    let start=new Date(startDate);
+    let end=new Date(endDate);
+    let dataRange=[];
+    for(let i=0; i<sortedDateArray.length; i++){
+      if((new Date(sortedDateArray[i].entryDateTime))>=start && (new Date(sortedDateArray[i].entryDateTime))<=end){
+        dataRange[dataRange.length]=sortedDateArray[i];
+      }
+    }
+    return dataRange;
+  }
+  getContactsData(id){
+    try{
+      fetch(
+        `https://emata-crmservice-test.laboremus.no/api/contact/role?OrganisationId=${id}&types=1`,
+        {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("Token"),
+            "Transfer-Encoding": "chunked",
+            "Content-Type": "application/json;charset=UTF-8",
+            "Content-Encoding": "gzip",
+            Vary: "Accept-Encoding",
+            "X-Content-Type-Options": "nosniff",
+            "types": 1
+          },
+          method: "GET"
+        })
+      .then(response=>response.json())
+      .then(res=>{
+        if(!res){this.handleClickOpen();}
+        else{
+          if(res.code===400){//please try again later alert needed
+            this.handleClickOpen();
+          }
+          else if(res.code===500){this.getContactsData(id);}
+          else{
+            let newState = this.state;
+            newState.farmerGraphData.contacts = res;
+            this.setState(newState);
+          }
+        }
+      });
+    }
+    catch(e){this.handleClickOpen();}
+  }
+  paymentMethod(id){//this function populates the payment method list in the payment graph
+    fetch(" https://emata-crmservice-test.laboremus.no/api/payment/method?organisationId="+id,
+    {
+      headers: {
+        Authorization: "Bearer " + this.getCookie("ac-tn"),
+        "Transfer-Encoding": "chunked",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Content-Encoding": "gzip",
+        Vary: "Accept-Encoding",
+        "X-Content-Type-Options": "nosniff"
+      },
+      method: "GET"
+    })
+    .then(response => response.json())
+    .then(res=>{
+      if(!res){this.handleClickOpen();}
+      else{
+        if(res.code===400){//please try again later alert needed
+          this.handleClickOpen();
+        }
+        else if(res.code===500){this.paymentMethod(id);}
+        else{
+          let newState= this.state;
+          newState.paymentMethodData = res;
+          this.setState(newState);
+        }
+      }
+    })
+    .catch(error => {this.handleClickOpen()}); //reject(error);
+  }
+
+  render(){
+    let classes = this.props;
+    const { fullScreen } = this.props;
+    if(!this.getCookie("ac-tn") || !localStorage.getItem("UserId")){
+      return (<Redirect exact to={'/'}/>)
+    }
+    else{
+      return <div className='parentDiv'>
+        <div className="dashboardNavDiv">
+          <NavbarV2 
+            passCoopSignal={(id,name)=>this.handleCoopSignal(id,name)} 
+            passDateSignal={(startDate,endDate)=>this.handleDateSignal(startDate,endDate)}
+          />
+          {this.showLoader()}
+        </div>
+        {/*
+        <div className="titleCard">
+          <p className="title">{this.state.coopName}</p>
+        </div>*/}
+        <div className="dashboardGraphContainer">
+          <div className={classes.root}>
+            <Grid container spacing={8}>
+              <Grid item  sm={12}>
+                <Paper className="titleCard">
+                  <p className="title">{this.state.coopName}</p>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Paper className="monthlyOVCard">
+                  <p className="cardNames">Annual Milk Collections</p>
+                  <MonthlyOverview passCoopData={this.state.entries}/>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Paper className="deliveryDetailsCard">
+                  <p className="cardNames">Deliveries</p>
+                  <DeliveryAmounts passCoopData={this.state.dateRangeEntries}/>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Paper className="farmersCard">
+                  <p className="cardNames">Farmers Demographics</p>
+                  <Farmers passCoopData={this.state.farmerGraphData}/>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={3} lg={2}>
+                <Paper className="utilizationCard">
+                  <p className="utilizationcardName">Utilization Rate</p>
+                  <UtilizationRate passCoopData={this.state.farmerGraphData}/>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Paper className="paymentCard">
+                  <p className="cardNames">Payments</p>
+                  <Payment passCoopData={this.state.paymentMethodData}/>
+                </Paper>
+              </Grid>
+            </Grid>
+          </div>
+        </div>
+        <Dialog
+          fullScreen={fullScreen}
+          open={this.state.open}
+          onClose={this.handleClose}
+          style={{backgroundColor: 'transparent', color:'red'}}
+          overlayStyle={{backgroundColor: 'red', color:'red'}}
+          aria-labelledby="responsive-dialog-title"
+        >
+          <DialogContent>
+            <DialogContentText>
+              ERROR: Please try again later.
+            </DialogContentText>
+          </DialogContent>
+        </Dialog>
+      </div>
+    }
+  }
 }
 
 FullWidthGrid.propTypes = {
@@ -103,64 +356,3 @@ FullWidthGrid.propTypes = {
 };
 
 export default FullWidthGrid;
-
-
-
-/*
-//Linear buffer code to indicate loading
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import LinearProgress from '@material-ui/core/LinearProgress';
-
-const styles = {
-  root: {
-    flexGrow: 1,
-  },
-};
-
-class LinearBuffer extends React.Component {
-  state = {
-    completed: 0,
-    buffer: 10,
-  };
-
-  componentDidMount() {
-    this.timer = setInterval(this.progress, 500);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timer);
-  }
-
-  progress = () => {
-    const { completed } = this.state;
-    if (completed > 100) {
-      this.setState({ completed: 0, buffer: 10 });
-    } else {
-      const diff = Math.random() * 10;
-      const diff2 = Math.random() * 10;
-      this.setState({ completed: completed + diff, buffer: completed + diff + diff2 });
-    }
-  };
-
-  render() {
-    const { classes } = this.props;
-    const { completed, buffer } = this.state;
-    return (
-      <div className={classes.root}>
-        <LinearProgress variant="buffer" value={completed} valueBuffer={buffer} />
-        <br />
-        <LinearProgress color="secondary" variant="buffer" value={completed} valueBuffer={buffer} />
-      </div>
-    );
-  }
-}
-
-LinearBuffer.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(LinearBuffer);
-
-*/

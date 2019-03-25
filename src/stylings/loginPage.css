@@ -109,6 +109,17 @@ img.loginLogo {
   padding: 0px;
   margin: 35px;
 }
+.loading {
+  background: rgba(0,0,0,0);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 7%;
+  height: calc(1.3rem + 2px);
+  line-height: 0px;
+  padding: 0px;
+  margin-top: 1rem;
+}
 .errorMessageDiv {
   background: rgba(255,0,0,0.2);
   border-color: rgba(255,0,0,0.8);

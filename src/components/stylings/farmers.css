@@ -12,6 +12,7 @@
   margin-left: auto;
 }
 .textCards{
+  text-align: center;
   display: inline-block;
   background: rgba(255,255,255,0.7);
   border-color: rgba(0,0,0,0.0);
@@ -25,24 +26,24 @@
   margin-bottom: 5px
 }
 .contentNumber1{
-  margin-top: 20px;
-  margin-left: 40px;
+  display: block;
+  margin-top: 10px;
   color: rgba(0,0,0,0.75);
   text-anchor: center;
   font-size: 1rem;
   font-weight: bold;
 }
 .contentNumber2{
-  margin-top: 20px;
-  margin-left: 50px;
+  display: block;
+  margin-top: 10px;
   color: #1AB394;/*rgba(116,191,252,1.0);*/
   text-anchor: center;
   font-size: 1rem;
   font-weight: bold;
 }
 .contentNumber3{
-  margin-top: 20px;
-  margin-left: 50px;
+  display: block;
+  margin-top: 10px;
   color: #e05757;
   text-anchor: center;
   font-size: 1rem;
@@ -53,5 +54,5 @@
   text-anchor: center;
   font-size: 0.7rem;
   font-weight: bold;
-  margin-left: 3px;
+  margin-top: 7px;
 }

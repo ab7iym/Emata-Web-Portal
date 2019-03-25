@@ -62,11 +62,6 @@ class FullWidthGrid extends React.Component{
     start.setDate(1);
     start.setMonth(0);
     start.setFullYear(end.getFullYear()-1);
-
-    //console.log("startDate: "+start+" endDate: "+end);
-    console.log("ID Passed: ", this.state.coopId,"Name Passed: ", this.state.coopName);
-    console.log("Start-Date Passed: ", this.state.startDate);
-    console.log("End-Date Passed: ", this.state.endDate);
     this.paymentMethod(this.state.coopId);
     this.getContactsData(this.state.coopId);
     this.getCoopsData(this.state.coopId,start,end,this.state.startDate,this.state.endDate);//start and end are the dates used to populate the milk collections card
@@ -82,7 +77,6 @@ class FullWidthGrid extends React.Component{
       newState.farmerGraphData.endDate=endDate;
 
       if(startDateCheck.getFullYear()<start.getFullYear() && startDateCheck.getFullYear()<stateDateCheck.getFullYear()){//this checks if the selected date is beyond the date of the data collected before
-        console.log("----------------DATE EXCEEDED--------------");
         this.setState(newState);
         this.getCoopsData(this.state.coopId,startDate,end,startDate,endDate);
       }
@@ -91,15 +85,11 @@ class FullWidthGrid extends React.Component{
         newState.dateRangeEntries = dataRange;
         newState.farmerGraphData.entries = dataRange;
         this.setState(newState);
-        console.log("Start-Date Passed: ", this.state.startDate);
-        console.log("End-Date Passed: ", this.state.endDate);
-      }
+       }
       //newState.showLoader=true;
     }
   };
   showLoader(){
-    console.log("showLoader Started");
-    //console.log("Token-Cookie: ", this.getCookie("ac-tn"));
     if(this.state.showLoader){return <Loader/>}
   }
   getCookie(sKey) {//this fuction extracts the token value from the cookie storage
@@ -114,20 +104,16 @@ class FullWidthGrid extends React.Component{
   //*
   componentDidMount(){
     this.timer = setInterval(this.renewToken, 85000000);//this timer is set to run the renewToken function to get a new token when time expires
-    console.log("---------------------renewTokenDetails-----------------------");
     let newState=this.state;
     newState.renewTokenDetails.password=localStorage.getItem('ps');
     newState.renewTokenDetails.username=localStorage.getItem('us');
-    console.log("---------------------renewTokenDetails: ", newState.renewTokenDetails);
     this.setState(newState);
     localStorage.removeItem('ps');
     localStorage.removeItem('us');
-    console.log("---------------------State-TokenDetails: ", this.state.renewTokenDetails);
-  }//*/
+  }
   componentWillUnmount(){clearInterval(this.timer);}
 
   renewToken(){
-    console.log("-------Renewing token------");
     fetch('https://emata-authservice-test.laboremus.no/users/login',{
         headers: {
           'Access-Control-Allow-Origin':'http://localhost:3000/',
@@ -147,40 +133,24 @@ class FullWidthGrid extends React.Component{
     .then(response=>response.json())
     .then(res=>{
       //this.verification(res);
-      if(res.code===500){
-          console.log("---------------------------------------");
-          console.log("StatusMessage: "+res.message);
-          this.renewToken();
-      }
+      if(res.code===500){this.renewToken();}
       else {this.verification(res);}
     })
   }
   verification(serverResponse){
     if(!serverResponse){
-      console.log("--------No response yet--------");
+      this.handleClickOpen();
     }
     else{
-      console.log("This is the feedback: ",serverResponse);
-      console.log("---------------------------------------");
-      console.log("Status: "+serverResponse.code);
       if(serverResponse.code===400){//please try again later alert needed
         alert('ERROR-CODE 400');
       }
-      // else if(serverResponse.code===500){
-      //     console.log("---------------------------------------");
-      //     console.log("StatusMessage: "+serverResponse.message);
-      //     this.renewToken();
-      // }
       else{
-        console.log("------------------SUCCESS NEW TOKEN RECEIVED---------------------");
         this.setTokenCookie(serverResponse.accessToken);//this is used to save the token value in a cookie
-        //localStorage.setItem('Token',serverResponse.accessToken);//saving the token to local storage in the browser
-        console.log("Access Token: "+serverResponse.accessToken);
       }
     }
   }
   getCoopsData(id,startDate,endDate,startDateRange,endDateRange){//this function populates the coops list in the search bar
-    console.log("getCoopsData function has been called");
     fetch('https://emata-ledgerservice-test.laboremus.no/api/ledger/ledger-entries-in-period?organisationId='+id+'&entryType=1'+'&startDate='+startDate+'&endDate='+endDate,{
       headers: {
         'Authorization':'Bearer '+this.getCookie("ac-tn"),
@@ -195,29 +165,21 @@ class FullWidthGrid extends React.Component{
     .then(response=>response.json())
     .then(res=>{
       if(!res){
-        console.log("--------------No response yet--------------");
+        this.handleClickOpen();
       }
       else{
-        console.log("This is the feedback: ",res);
-        console.log("---------------------------------------");
-        console.log("Status: "+res.code);
         if(res.code===400){//please try again later alert needed
           this.handleClickOpen();
         }
         else if(res.code===500){
-          console.log("------------------ERROR-CODE 500---------------------");
-          console.log("StatusMessage: "+res.message);
           this.getCoopsData(id,startDate,endDate,startDateRange,endDateRange);
         }
         else{
-          console.log("--------------------------------------------------------------------------------------------------------------------------------");
-          console.log(res);
           let newState= this.state;
           let sortedDateArray=[];
           let dataRange='';
           sortedDateArray = res.farmerLedgerEntries;//this stores the data of only the farmers' entries
           sortedDateArray.sort(function(a,b){return new Date(a.entryDateTime) - new Date(b.entryDateTime)});
-          console.log("sorted-Object-Array: ",sortedDateArray);
           dataRange=this.getDataByDateRange(sortedDateArray,startDateRange,endDateRange);//sorting by the date range and assigning it to dateRange
           newState.Gduration = newState.Gduration+0.0001;
           newState.showLoader = false;//turning off the loader component
@@ -226,7 +188,6 @@ class FullWidthGrid extends React.Component{
           newState.farmerGraphData.entries = dataRange;
           localStorage.setItem('dateRangeEntries', newState.dateRangeEntries);
           this.setState(newState);
-          console.log("state: ", this.state);//*/
         }
       }
     })
@@ -247,7 +208,6 @@ class FullWidthGrid extends React.Component{
     return dataRange;
   }
   getContactsData(id){
-    console.log("famers function has been called");
     try{
       fetch(
         `https://emata-crmservice-test.laboremus.no/api/contact/role?OrganisationId=${id}&types=1`,
@@ -265,34 +225,23 @@ class FullWidthGrid extends React.Component{
         })
       .then(response=>response.json())
       .then(res=>{
-        if(!res){
-          console.log("--------------No response yet--------------");
-        }
+        if(!res){this.handleClickOpen();}
         else{
-          console.log("This is the feedback: ",res);
-          console.log("---------------------------------------");
-          console.log("Status: "+res.code);
           if(res.code===400){//please try again later alert needed
             this.handleClickOpen();
           }
-          else if(res.code===500){
-            console.log("------------------ERROR-CODE 500---------------------");
-            console.log("StatusMessage: "+res.message);
-            this.getContactsData(id);
-          }
+          else if(res.code===500){this.getContactsData(id);}
           else{
             let newState = this.state;
             newState.farmerGraphData.contacts = res;
             this.setState(newState);
-            console.log(this.state.coopContactList);
           }
         }
       });
     }
-    catch(e){console.log(e);}
+    catch(e){this.handleClickOpen();}
   }
   paymentMethod(id){//this function populates the payment method list in the payment graph
-    console.log("---------------------paymentMethod function has been called------------------------");
     fetch(" https://emata-crmservice-test.laboremus.no/api/payment/method?organisationId="+id,
     {
       headers: {
@@ -307,36 +256,25 @@ class FullWidthGrid extends React.Component{
     })
     .then(response => response.json())
     .then(res=>{
-      if(!res){
-        console.log("--------------No response yet--------------");
-      }
+      if(!res){this.handleClickOpen();}
       else{
-        console.log("This is the feedback: ",res);
-        console.log("---------------------------------------");
-        console.log("Status: "+res.code);
         if(res.code===400){//please try again later alert needed
           this.handleClickOpen();
         }
-        else if(res.code===500){
-          console.log("------------------ERROR-CODE 500---------------------");
-          console.log("StatusMessage: "+res.message);
-          this.paymentMethod(id);
-        }
+        else if(res.code===500){this.paymentMethod(id);}
         else{
-          console.log("paymentMethod Res dashboard",res);
           let newState= this.state;
           newState.paymentMethodData = res;
           this.setState(newState);
         }
       }
     })
-    .catch(error => {return error;}); //reject(error);
+    .catch(error => {this.handleClickOpen()}); //reject(error);
   }
 
   render(){
     let classes = this.props;
     const { fullScreen } = this.props;
-    console.log("Current ");
     if(!this.getCookie("ac-tn") || !localStorage.getItem("UserId")){
       return (<Redirect exact to={'/'}/>)
     }

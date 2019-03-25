@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import 'react-dom';
 import './stylings/farmers.css';
 import Highcharts from 'highcharts';
-import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, Title, Legend, SplineSeries} from 'react-jsx-highcharts';
+import {HighchartsChart, Chart, withHighcharts, XAxis, YAxis, SplineSeries} from 'react-jsx-highcharts';
 
 class FarmersCard extends Component {
   constructor(props) {
@@ -49,40 +49,20 @@ class FarmersCard extends Component {
   }
 
 	static getDerivedStateFromProps(newProp=this.props.passCoopData, state=this.state){
-		console.log("------------Farmers Card received props-------------");
 		let newState = state;
-    //newState.entries = newProp.passCoopData.entries;
     newState.contacts = newProp.passCoopData.contacts;
 		newState.object = newProp;
     return newState;
 	}
 
   setgraphData = (object,activeFarmersList) =>{
-    console.log("OBJECT RECEIVED: ",object);
     let entries = object.passCoopData.entries;
     let graphData = [];
-    // let getstartDate = new Date(object.passCoopData.startDate);
-    // let getendDate =  new Date(object.passCoopData.endDate);
-    // let temporaryDate;
-    let counter;
-    console.log("entries-Farmer entries: ",entries);
-    console.log("entries.length: ",entries.length);
-    // function addDays(date, days) {
-    //   var result = new Date(date);
-    //   result.setDate(result.getDate() + days);
-    //   return result;
-    // } 
-
-    // let endDateYear = getendDate.getFullYear();
-    // let endDateMonth = getendDate.getMonth();
-    // let endDateDate = getendDate.getDate();
 
     for(let i=0; i<entries.length; i++){//sorting the entries by date so as to get total deliveries in one day
       let entryDate = new Date(entries[i].entryDateTime);//getting a new date from the array;
       let farmerId = entries[i].farmerId;//getting a new date from the array;
       let prevEntryDate = '';
-      console.log("farmerId: ",farmerId)
-      console.log("activeFarmersList-Check: ",activeFarmersList[0])
       function checkFarmerId() {
         let present= false;
         for(let z=0; z<activeFarmersList.length; z++){
@@ -93,11 +73,9 @@ class FarmersCard extends Component {
         }
         return present;
       }
-      console.log("Function-Result: ",checkFarmerId());
       if(checkFarmerId()){
         if(graphData.length>0){//check if the previous date entry already exists
           prevEntryDate=graphData[graphData.length-1].entryDateTime;
-          //console.log('prev-new: '+prevEntryDate.getMonth()+'-'+entryDate.getMonth()+' '+prevEntryDate.getMonth()+'-'+entryDate.getMonth()+' '+prevEntryDate.getFullYear()+' '+entryDate.getFullYear());
         }
         if(graphData.length===0){//check if the array has no value and add a value in the first position
           graphData[graphData.length] = {'entryDateTime': entryDate , 'noOfEntries': 1};
@@ -116,8 +94,6 @@ class FarmersCard extends Component {
       let lastDateOfEntry = new Date(graphData[graphData.length-1].entryDateTime);//this holds the date of the last entry made in the period selected
       let noOfDays = (parseInt((lastDateOfEntry - firstDateOfEntry) / (24 * 3600 * 1000)))+2;//this gets the number of days between the dates
       let allDatesInRange = [];
-      //console.log("firstDateOfEntry: ",firstDateOfEntry);console.log("lastDateOfEntry: ",lastDateOfEntry);
-      //console.log("noOfDays: ",noOfDays);
       for(let i=0; i<noOfDays; i++){
         let date = ''
         if(i===0){date = new Date(firstDateOfEntry.setDate(firstDateOfEntry.getDate()));}
@@ -131,43 +107,32 @@ class FarmersCard extends Component {
           }
         }
       }//*/
-      console.log("allDatesInRange: ",allDatesInRange);
       graphData=allDatesInRange;
     }
 
     for(let i=0; i<graphData.length; i++){//loop to convert the entries array date to date.UTC
       let entryDate = new Date(graphData[i].entryDateTime);//getting a new date from the array;
       graphData[i] = [Date.UTC(entryDate.getFullYear(), entryDate.getMonth(), entryDate.getDate()) , graphData[i].noOfEntries]
-      //{'entryDateTime': entryDate , 'noOfEntries': 1};
     }
-    console.log("GraphData: ",graphData);
     let newState = this.state;
     newState.entries = graphData;
     newState.Gduration = newState.Gduration+0.0001;
-    //this.setState(newState);
     return newState;
   };
 
   handleFarmersGraph = (object)=>{
-    //this.getContactsData();
     let startDate = "";
     let endDate = "";
     let weeks = "";
-    let graphData = [];
-    let temperyDate = new Date();
     let activeFarmers = '';
     let activeFarmersList = [];
     let inactiveFarmers = this.state.contacts.length;
 
     //changing the start and end date into days, weeks//
     if(object.passCoopData.startDate){
-      let formateDate; 
-      let dateRange;
       startDate = object.passCoopData.startDate;
       endDate = object.passCoopData.endDate;
-      dateRange = this.mydiff(startDate,endDate,"days");
       weeks = this.mydiff(startDate,endDate,"weeks");
-      console.log(weeks," weeks");
     }
 
     //passing the coopdates and coopdata from the API to populate the farmers Id//
@@ -175,10 +140,7 @@ class FarmersCard extends Component {
       let i=0;
       let j=0;
       let p=0;
-      let days = [];
-      let found = 0;
       let obj = object.passCoopData.entries;
-      let dt= "";
       let flag = 0;
       let contacts = [];
       activeFarmers = 0;
@@ -208,7 +170,6 @@ class FarmersCard extends Component {
         }
         for(i=0;i<contacts.length;i++){//loop though the array to get contacts Id
           let contact = contacts[i];
-          let contactActive = false;
           let contactActiveCounter = 0;
           let weekDelivery = 0;
           let activeness = 0;
@@ -245,13 +206,8 @@ class FarmersCard extends Component {
           if (activeness <60) activeFarmers = activeFarmers
           else{activeFarmers = activeFarmers + 1; activeFarmersList.push(contact)};//checking if the farmer deliver is over 60%
           inactiveFarmers = (this.state.contacts.length) - (activeFarmers);//calculating the inactive farmer 
-          console.log("activeFarmersList: ", activeFarmersList)
-          console.log("Farmer id = ",contact,"consistence detection = ",contactActiveCounter,"Consistence = ",activeness,"%");
-          console.log(activeFarmers,"Active farmers");  
-          console.log(inactiveFarmers,"Inactive farmer") 
         }     
       }
-      //console.log(contacts); 
     }
     let newState = this.state;
     newState.activeFarmersList = activeFarmersList;
@@ -264,9 +220,6 @@ class FarmersCard extends Component {
 
   render(){
     let farmerData=this.handleFarmersGraph(this.state.object);
-    //let graphData=this.setgraphData(this.state.object);
-    console.log('The Updated State: ',this.state);
-    const labels = { style: { fontSize: "40px" } };
     const plotOptions = {
       series: { animation: { duration: this.state.Gduration } }
     };
@@ -308,5 +261,3 @@ class FarmersCard extends Component {
 }
 
 export default withHighcharts(FarmersCard, Highcharts);
-
-//data={[3.9,4.2, 5.7,8.5,11.9,15.2,17.0,16.6,14.2,10.3,6.6,4.8]}

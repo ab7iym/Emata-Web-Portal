@@ -35,32 +35,25 @@ class DeliveryCard extends Component {
       else if(number===2){abc.tab2=true; abc.actTab2='rgba(0, 0, 0, 0.15)'}
       else if(number===3){abc.tab3=true; abc.actTab3='rgba(0, 0, 0, 0.15)'}
       this.setState({tabs: abc});
-      console.log(this.state.tabs);
   }
   checkStateChange(){//this function is called to update the state name of loginDetails object
-    console.log("checkIdChange function has been called");
-    console.log("DVApassed startdate:", this.props.passCoopData);
     if(this.state.dateRangeEntries===this.props.passCoopData){
       return this.showGraph();
     }
     else{
-      console.log("--------------DVA condition different-Data-----------");
       let newState = this.state;
       newState.dateRangeEntries = this.props.passCoopData;
       this.setState(newState);
     }
   }
   showGraph(){
-    console.log("showGraph Started");
     if(this.state.tabs.tab1){
-      console.log("Tab1 is selected");
       return <NoOfDeliveries passCoopData={this.state.dateRangeEntries}/>
     }
     else if(this.state.tabs.tab2){
-      console.log("Tab2 is selected");
       return <AveDeliverySize passCoopData={this.state.dateRangeEntries}/>
     }
-    else{console.log("Tab3 is selected");
+    else{
       return <AmtMilkDeliveries passCoopData={this.state.dateRangeEntries}/>
     }
   }

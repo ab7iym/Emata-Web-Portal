@@ -44,7 +44,6 @@ class UtilizationCard extends Component {
   }
 
   static getDerivedStateFromProps(newProp=this.props.passCoopData, state=this.state){
-    console.log("------------Farmers Card received props-------------");
     let newState = state;
     newState.contacts = newProp.passCoopData.contacts;
     newState.object = newProp;
@@ -52,20 +51,13 @@ class UtilizationCard extends Component {
   }
 
   setgraphData = (object,activeFarmersList) =>{
-    console.log("UT-OBJECT RECEIVED: ",object);
-    console.log("UT-activeFarmersList RECEIVED: ",activeFarmersList);
     let entries = object.passCoopData.entries;
-    let graphData = [];
     let counter=0;
     let percentage=0;
-    console.log("UTentries-Farmer entries: ",entries);
-    console.log("UTentries.length: ",entries.length);
     if(entries.length){//check if the entries.length is not null
       if(activeFarmersList.length>0){
         for(let i=0; i<entries.length; i++){//sorting the entries by date so as to get total deliveries in one day
           let farmerId = entries[i].farmerId;//getting a new date from the array;
-          console.log("UTfarmerId: ",farmerId)
-          //console.log("UTactiveFarmersList-Check: ",activeFarmersList[0])
           function checkFarmerId() {
             let present= false;
             for(let z=0; z<activeFarmersList.length; z++){
@@ -76,15 +68,12 @@ class UtilizationCard extends Component {
             }
             return present;
           }
-          console.log("UTFunction-Result: ",checkFarmerId());
           if(checkFarmerId()){//Adding Entries of the same date
             counter=counter+1;  
           }
         }
-        console.log("UTGraphData-Counter: ",counter);
         percentage = (counter/entries.length)*100;
         percentage = parseFloat(percentage.toFixed(1))
-        console.log("UTGraphData-Percentage: ",percentage);
         let newState = this.state;
         if(percentage && entries.length){//check if percentage && entries.length are not null values
           newState.percentage = percentage;
@@ -121,21 +110,15 @@ class UtilizationCard extends Component {
     let startDate = "";
     let endDate = "";
     let weeks = "";
-    let graphData = [];
-    let temperyDate = new Date();
     let activeFarmers = '';
     let activeFarmersList = [];
     let inactiveFarmers = this.state.contacts.length;
 
     //changing the start and end date into days, weeks//
     if(object.passCoopData.startDate){
-      let formateDate; 
-      let dateRange;
       startDate = object.passCoopData.startDate;
       endDate = object.passCoopData.endDate;
-      dateRange = this.mydiff(startDate,endDate,"days");
       weeks = this.mydiff(startDate,endDate,"weeks");
-      console.log(weeks," weeks");
     }
 
     //passing the coopdates and coopdata from the API to populate the farmers Id//
@@ -143,10 +126,7 @@ class UtilizationCard extends Component {
       let i=0;
       let j=0;
       let p=0;
-      let days = [];
-      let found = 0;
       let obj = object.passCoopData.entries;
-      let dt= "";
       let flag = 0;
       let contacts = [];
       activeFarmers = 0;
@@ -176,7 +156,6 @@ class UtilizationCard extends Component {
         }
         for(i=0;i<contacts.length;i++){//loop though the array to get contacts Id
           let contact = contacts[i];
-          let contactActive = false;
           let contactActiveCounter = 0;
           let weekDelivery = 0;
           let activeness = 0;
@@ -210,16 +189,11 @@ class UtilizationCard extends Component {
 
           activeness = (contactActiveCounter/weeks)*100 //calculating the activeness of a farmer
           activeness = Math.round(activeness); //rounding the whole number 
-          if (activeness <60) activeFarmers = activeFarmers
+          if (activeness <60) {activeFarmers = activeFarmers}
           else{activeFarmers = activeFarmers + 1; activeFarmersList.push(contact)};//checking if the farmer deliver is over 60%
           inactiveFarmers = (this.state.contacts.length) - (activeFarmers);//calculating the inactive farmer 
-          console.log("activeFarmersList: ", activeFarmersList)
-          console.log("Farmer id = ",contact,"consistence detection = ",contactActiveCounter,"Consistence = ",activeness,"%");
-          console.log(activeFarmers,"Active farmers");  
-          console.log(inactiveFarmers,"Inactive farmer") 
         }     
       }
-      //console.log(contacts); 
     }
     let newState = this.state;
     newState.activeFarmersList = activeFarmersList;

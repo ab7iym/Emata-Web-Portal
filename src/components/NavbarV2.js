@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import 'react-dom';
 import {Redirect} from 'react-router-dom';
 import {Typeahead} from 'react-bootstrap-typeahead';
-import Autocomplete from  'react-autocomplete';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import './stylings/navBarV2.css';
@@ -35,19 +34,14 @@ class NavBar extends Component {
     localStorage.clear();//clearing the localstorage data
     sessionStorage.clear();//clearing the localstorage data
     if(!localStorage.getItem("Token")){//checking if the token was cleared
-      console.log("I was logged out");
       return (//returning to the login page
-        console.log("I was redirected"),
         <Redirect exact to={'/'}/>,//redirecting to the login page
         window.location.reload()//this is used to refresh the page
       )
     }
   }
   handleChange = (event) => {this.setState({ value: event.target.value })}
-  /*handleDateChange = (newDate) => {
-    this.setState({startDate: newDate});
-    console.log("startDate "+ this.state.startDate);
-  }*/
+  
   componentDidMount(){
     this.getCoopsList();
   }
@@ -57,7 +51,6 @@ class NavBar extends Component {
   }
 
   getCoopsList(){//this function populates the coops list in the search bar
-    console.log("getCoopsList function has been called");
     fetch('https://emata-crmservice-test.laboremus.no/api/organisation',{
         headers: {
           'Authorization':'Bearer '+this.getCookie("ac-tn"),
@@ -71,23 +64,15 @@ class NavBar extends Component {
     })
     .then(response=>response.json())
     .then(res=>{
-       if(!res){
-        console.log("--------------No response yet--------------");
-      }
+      if(!res){alert('SERVER ERROR. Please try again later.');}
       else{
-        console.log("This is the feedback: ",res);
-        console.log("---------------------------------------");
-        console.log("Status: "+res.code);
         if(res.code===400){//please try again later alert needed
           alert('ERROR-CODE 400');
         }
         else if(res.code===500){
-          console.log("------------------ERROR-CODE 500---------------------");
-          console.log("StatusMessage: "+res.message);
           this.getCoopsList();
         }
         else{
-          console.log(res);
           let newState = this.state;
           newState.coops = [];
           for (let i=0; i<res.length; i++) {
@@ -96,7 +81,6 @@ class NavBar extends Component {
             }
           }
           if(newState.coops.length>0){//this condition set the default value of the search input
-            console.log("---------------setting the defaultValue for search box-------------------");
             if(sessionStorage.getItem('cp-sl-id')){//check if there was a particular coop selected(this helps retain the same coop when the page is refreshed)
               this.props.passCoopSignal(sessionStorage.getItem('cp-sl-id'),sessionStorage.getItem('cp-sl-nm'));
             }
@@ -115,35 +99,27 @@ class NavBar extends Component {
   }
   
   handleStartDateChange(e){
-    console.log(e.target.value);
     sessionStorage.setItem('startDt-sl',e.target.value);
     let newState = this.state;
     newState.startDate = String(e.target.value);
     this.setState(newState);
-    //this.props.passDateSignal(this.state.startDate, this.state.endDate);
-    console.log("startDate Change: "+ this.state.startDate);
   }
   handleEndDateChange(e){
-    console.log(e.target.value);
     sessionStorage.setItem('endDt-sl',e.target.value);
     let newState = this.state;
     newState.endDate = String(e.target.value);
     this.setState(newState);
     this.props.passDateSignal(this.state.startDate, this.state.endDate);
-    console.log("EndDate Change: "+ this.state.endDate);
   }
   handleDefaultDateChange(startDate,endDate){
-    console.log("handleDefaultDateChange Called");
     this.props.passDateSignal(startDate, endDate);//this passes the dates props to the parent component
   }
   date_1_DefaultDate(){
     if(!sessionStorage.getItem('startDt-sl')){
-      var curr = new Date();
-      console.log("Default Curr date: "+curr);
-      curr.setDate(curr.getDate()-7);
-      var date = curr.toISOString().substr(0,10);
+      var currentDate = new Date();
+      currentDate.setDate(currentDate.getDate()-7);
+      var date = currentDate.toISOString().substr(0,10);
       sessionStorage.setItem('startDt-sl',date);
-      console.log("Default 1 date: "+date);
       return date
     }
     else{return sessionStorage.getItem('startDt-sl');}
@@ -153,7 +129,6 @@ class NavBar extends Component {
       var currentDate = new Date();
       currentDate.setDate(currentDate.getDate());
       var date = currentDate.toISOString().substr(0,10);
-      console.log("Default 2 date: "+date);
       sessionStorage.setItem('endDt-sl',date);
       return date
     }
@@ -177,8 +152,6 @@ class NavBar extends Component {
   }
   onSelectCoop(obj) {//this function gets the selected coop and saves it to local storage
     if(obj.length>0){//this checks if the obj array has a value
-      console.log('onSelectCoop.call ', obj);
-      console.log('onSelectCoop.name ', obj[0].name);
       let newState = this.state;
       newState.coopSelected = obj[0].name;
       this.setState(newState);

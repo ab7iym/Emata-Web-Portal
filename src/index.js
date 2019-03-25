@@ -1,7 +1,6 @@
 import React, { Component} from 'react';
 import ReactDOM from 'react-dom';
 import {Switch,Route, BrowserRouter} from 'react-router-dom';
-import ReduxStore from "./reduxStore";
 import DashBoard from "./DashBoard";
 import LoginPage from "./loginPage";
 import Default from "./components/Default";
@@ -13,7 +12,6 @@ class Login extends Component {
     this.state={id : 1}
   }
   render() {
-    console.log("inside render");
     return <div>
       <BrowserRouter>
         <Switch>

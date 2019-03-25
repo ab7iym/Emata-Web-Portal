@@ -13,36 +13,22 @@ class Payment extends Component {
 	      paymentList: []
 	    };
 	    this.paymentMethod=this.paymentMethod.bind(this);
-	    this.checkIdChange=this.checkIdChange.bind(this);
   	}
   	componentDidMount() {
 		this.paymentMethod(this.props.passCoopData);
   		let newState = this.state;
 	    newState.paymentList = this.props.passCoopData;
 	    this.setState(newState);
-		//this.paymentMethod(this.props.passCoopData)
 	}
 	static getDerivedStateFromProps(newProp=this.props.passCoopData, state=this.state){
-		console.log("------------Milk Collection received props-------------");
 		let newState = state;
 		newState.paymentList = newProp.passCoopData;
 		return newState;
-	}
-	checkIdChange(){
-		//console.log("checkIdChange function has been called");
-		// if(this.state.id!==this.props.passCoopId){
-		// 	let newState = this.state;
-		// 	newState.id = this.props.passCoopId;
-		// 	this.setState(newState);
-		// 	this.paymentMethod(this.state.id);
-		// }
 	}
 	shouldComponentUpdate(){
 		return true
 	}
 	paymentMethod(res){//this function populates the payment method list in the payment graph
-	    console.log("--------------------------------------paymentMethod function has been called--------------------------------------");
-	    console.log("Res: ", res);
 	    let contact = res;
         let len = contact.length;
         let Cash = 0;
@@ -61,20 +47,14 @@ class Payment extends Component {
           }
           else {return null}
         }
-        console.log(Cash, Bank, MobileMoney);
-
         let newState= this.state;
         newState.data[0] = Bank;
         newState.data[1] = Cash;
         newState.data[2] = MobileMoney;
    		newState.Gduration = newState.Gduration+0.0001;
    		return newState;
-        //this.setState(newState);
-        //console.log("Payment state: ", this.state);
-  	}
+    }
  	render(){
- 		//var org_data = localStorage.getItem('cp-sl');
- 		//this.checkIdChange();
  		let res=this.paymentMethod(this.state.paymentList);
  		const categories= ['Bank', 'Cash', 'MobileMoney'];
   		const labels= {style: {fontSize:'40px'}}
@@ -86,7 +66,6 @@ class Payment extends Component {
   		var tooltip = {valueSuffix: 'farmers'}
 	    return(
 	    	<div className="topDiv">
-	    		{console.log("render started")}
 	    		
 		        <HighchartsChart  
 		        	className="paymentGraph"
